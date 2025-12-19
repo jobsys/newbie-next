@@ -1,0 +1,67 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["oxc", "eslint", "react", "unicorn"],
+	"categories": {
+		"correctness": "error",
+		"style": "error",
+		"suspicious": "error",
+	},
+	"env": {
+		"builtin": true,
+		"es2026": true,
+		"node": true,
+		"shared-node-browser": true,
+	},
+	"rules": {
+		"eslint/camelcase": "error",
+		"no-debugger": "allow",
+		"no-unused-vars": "error",
+		"no-plusplus": [
+			"error",
+			{
+				"allowForLoopAfterthoughts": true,
+			},
+		],
+		/* ===== React 基础：不打扰 TS，用 TS 管类型 ===== */
+		"react/prop-types": "off",
+		// 你用 TS，不需要 prop-types
+		"react/display-name": "off",
+		// 自然使用具名函数/常量，没必要强制
+
+		/* ===== React 正确性（error 级别）===== */
+		"react/tsx-key": "error",
+		// 列表必须有 key
+		"react/no-unknown-property": "error",
+		// className 等属性写错直接报
+		"react/tsx-no-undef": "error",
+		// tsx 里用到未定义的组件/变量
+		"react/tsx-no-target-blank": "error",
+		// 防止 target="_blank" 没 rel 安全问题
+		"react/no-danger": "warn",
+		// 防止滥用 dangerouslySetInnerHTML
+		"react/no-direct-mutation-state": "error",
+		// 虽然你主要用 hooks，但防一手
+
+		/* ===== React 代码质量（warn 级别，不烦人）===== */
+		"react/self-closing-comp": "warn",
+		// <Foo></Foo> 能写成 <Foo /> 时提醒
+		"react/tsx-no-useless-fragment": "warn",
+		// 多余的 <>...</> 提醒你简化
+		"react/tsx-boolean-value": "warn",
+		// 布尔值属性可以不写等号，提醒你简化
+
+		/* ===== React 17+ / 18 写法兼容 ===== */
+		"react/tsx-uses-react": "off",
+		// 新 tsx 转换不需要 React 在作用域中
+		"react/react-in-tsx-scope": "off",
+		// 同上
+
+		/* ===== Hooks 强约束（非常重要）===== */
+		"react-hooks/rules-of-hooks": "error",
+		// hooks 只能在顶层、函数组件里用
+		"react-hooks/exhaustive-deps": "warn",
+		// 依赖数组缺失时提醒，但设为 warn，避免过度打扰
+	},
+	"globals": {},
+	"ignorePatterns": ["public/*", "node_modules/*", "vendor/*", "*.config.js", "*.config.cjs", "*.config.mjs", "*.config.ts"],
+}
