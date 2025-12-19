@@ -1,4 +1,4 @@
-# @jobsys/newbie-next
+# jobsys-newbie-next
 
 AI-friendly React components built with Ant Design 6.1 and Pro Components.
 
@@ -12,7 +12,7 @@ AI-friendly React components built with Ant Design 6.1 and Pro Components.
 ## Installation
 
 ```bash
-pnpm add @jobsys/newbie-next
+pnpm add jobsys-newbie-next
 ```
 
 ## Quick Start
@@ -20,7 +20,7 @@ pnpm add @jobsys/newbie-next
 ### 1. 使用 NewbieProvider
 
 ```tsx
-import { NewbieProvider } from '@jobsys/newbie-next'
+import { NewbieProvider } from 'jobsys-newbie-next'
 
 function App() {
   return (
@@ -43,8 +43,8 @@ function App() {
 ### 2. 使用 NewbieSearch
 
 ```tsx
-import { NewbieSearch } from '@jobsys/newbie-next'
-import type { SearchFieldConfig } from '@jobsys/newbie-next'
+import { NewbieSearch } from 'jobsys-newbie-next'
+import type { SearchFieldConfig } from 'jobsys-newbie-next'
 
 function SearchExample() {
   const fields: SearchFieldConfig[] = [
