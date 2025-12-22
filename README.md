@@ -192,7 +192,7 @@ All code follows AI-friendly principles:
 
 ## Contributing
 
-See [DEVELOPMENT_GUIDE.md](./DEVELOPMENT_GUIDE.md) for detailed development guidelines.
+See [DEVELOPMENT_GUIDE.md](./docs/DEVELOPMENT_GUIDE.md) for detailed development guidelines.
 
 ## License
 

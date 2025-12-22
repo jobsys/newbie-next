@@ -44,7 +44,3 @@ lerna-debug.log*
 vite.config.js
 vite.config.d.ts
 
-# Changesets
-.changeset/*.md
-!.changeset/config.json
-
