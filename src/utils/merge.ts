@@ -16,10 +16,7 @@
  * // Result: { a: 1, b: { c: 2, d: 3 } }
  * ```
  */
-export function deepMerge<T extends Record<string, any>>(
-	target: T,
-	source: Partial<T> | Record<string, any> | undefined | null,
-): T {
+export function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T> | Record<string, any> | undefined | null): T {
 	if (!source) {
 		return target
 	}

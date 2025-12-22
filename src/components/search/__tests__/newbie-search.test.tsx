@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest"
 import { screen } from "@testing-library/react"
 import { NewbieSearch } from "../newbie-search"
 import { renderWithProviders } from "../../../test/test-utils"
-import type { SearchFieldConfig, QueryItem, SortForm } from "../types"
+import type { SearchFieldConfig } from "../types"
 
 describe("NewbieSearch", () => {
 	it("should render search component", () => {

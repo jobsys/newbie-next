@@ -153,7 +153,10 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 		}
 		// For textarea, format multi-line text for display
 		if (field.type === "textarea" && typeof value === "string") {
-			const lines = value.split("\n").map((line) => line.trim()).filter((line) => line !== "")
+			const lines = value
+				.split("\n")
+				.map((line) => line.trim())
+				.filter((line) => line !== "")
 			if (lines.length === 0) {
 				return ""
 			}
@@ -200,7 +203,10 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 		}
 		// For textarea, check if there's at least one non-empty line
 		if (field.type === "textarea" && typeof value === "string") {
-			const lines = value.split("\n").map((line) => line.trim()).filter((line) => line !== "")
+			const lines = value
+				.split("\n")
+				.map((line) => line.trim())
+				.filter((line) => line !== "")
 			return lines.length > 0
 		}
 		if (Array.isArray(value)) {

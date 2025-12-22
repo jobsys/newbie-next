@@ -157,14 +157,32 @@ export function App() {
 								<Divider />
 								<div>
 									<Title level={4}>查询结果 (onSubmit Payload)</Title>
-									<div style={{ display: 'flex', gap: 16 }}>
+									<div style={{ display: "flex", gap: 16 }}>
 										<Card title="Query (Array Format)" style={{ flex: 1 }}>
-											<pre style={{ margin: 0, background: "#f5f5f5", padding: "16px", borderRadius: "4px", fontSize: "12px", overflow: 'auto' }}>
+											<pre
+												style={{
+													margin: 0,
+													background: "#f5f5f5",
+													padding: "16px",
+													borderRadius: "4px",
+													fontSize: "12px",
+													overflow: "auto",
+												}}
+											>
 												{JSON.stringify(searchResult.query, null, 2)}
 											</pre>
 										</Card>
 										<Card title="Sort Rules" style={{ flex: 1 }}>
-											<pre style={{ margin: 0, background: "#f5f5f5", padding: "16px", borderRadius: "4px", fontSize: "12px", overflow: 'auto' }}>
+											<pre
+												style={{
+													margin: 0,
+													background: "#f5f5f5",
+													padding: "16px",
+													borderRadius: "4px",
+													fontSize: "12px",
+													overflow: "auto",
+												}}
+											>
 												{JSON.stringify(searchResult.sort, null, 2)}
 											</pre>
 										</Card>

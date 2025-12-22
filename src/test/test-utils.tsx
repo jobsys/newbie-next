@@ -16,10 +16,7 @@ import zhCN from "antd/locale/zh_CN"
  * @param options - Render options
  * @returns Render result
  */
-export function renderWithProviders(
-	ui: ReactElement,
-	options?: Omit<RenderOptions, "wrapper">,
-): RenderResult {
+export function renderWithProviders(ui: ReactElement, options?: Omit<RenderOptions, "wrapper">): RenderResult {
 	function Wrapper({ children }: { children: React.ReactNode }) {
 		return <ConfigProvider locale={zhCN}>{children}</ConfigProvider>
 	}

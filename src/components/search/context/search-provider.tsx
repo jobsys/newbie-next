@@ -32,7 +32,7 @@ export interface SearchProviderProps {
 export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	const { queryFields, sortFields = [], onSubmit, initialQueryForm = {}, children } = props
 
-    // ... (keep initialForm memo)
+	// ... (keep initialForm memo)
 	const initialForm = useMemo<QueryForm>(() => {
 		const form: QueryForm = { ...initialQueryForm }
 		queryFields.forEach((field) => {
@@ -65,7 +65,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	const [sortForm, setSortForm] = useState<SortForm>(initialSortForm)
 	const [submittedSortForm, setSubmittedSortForm] = useState<SortForm>(initialSortForm)
 
-    // ... (keep addSort, removeSort, updateSort, toggleSort)
+	// ... (keep addSort, removeSort, updateSort, toggleSort)
 	// Add sort field
 	const addSort = useCallback(
 		(key: string) => {
@@ -110,7 +110,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		[sortFields],
 	)
 
-    // ... (keep getFieldValue, updateFieldValue, resetFieldValue, resetAll, isFieldValueValid)
+	// ... (keep getFieldValue, updateFieldValue, resetFieldValue, resetAll, isFieldValueValid)
 	// Get field value
 	const getFieldValue = useCallback(
 		(key: string): FieldValue | undefined => {
@@ -191,7 +191,10 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 
 			// For textarea, check if there's at least one non-empty line
 			if (field.type === "textarea" && typeof value === "string") {
-				const lines = value.split("\n").map((line) => line.trim()).filter((line) => line !== "")
+				const lines = value
+					.split("\n")
+					.map((line) => line.trim())
+					.filter((line) => line !== "")
 				return lines.length > 0
 			}
 

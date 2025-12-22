@@ -671,9 +671,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 		return (
 			<div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
 				{options.map((opt: any) => {
-					const isSelected = isMultiple
-						? Array.isArray(currentValue) && currentValue.includes(opt.value)
-						: currentValue === opt.value
+					const isSelected = isMultiple ? Array.isArray(currentValue) && currentValue.includes(opt.value) : currentValue === opt.value
 
 					return (
 						<Tag.CheckableTag key={opt.value} checked={isSelected} onChange={() => handleSelect(opt.value)}>
@@ -710,9 +708,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				<div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
 					<div>{renderTiledSelect()}</div>
 					{field.expandable === "multiple" && (
-						<div style={{ fontSize: "12px", color: "#999", marginLeft: "12px", whiteSpace: "nowrap", paddingTop: "2px" }}>
-							(可多选)
-						</div>
+						<div style={{ fontSize: "12px", color: "#999", marginLeft: "12px", whiteSpace: "nowrap", paddingTop: "2px" }}>(可多选)</div>
 					)}
 				</div>
 			</div>

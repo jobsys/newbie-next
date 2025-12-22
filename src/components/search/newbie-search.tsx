@@ -23,21 +23,8 @@ import { useSearchContext } from "./context/search-context"
 import { SearchItem } from "./components/search-item"
 import { getConditionLabel } from "./utils/conditions"
 import type { NewbieSearchProps, SortField, SortFieldConfig } from "./types"
-import {
-	DndContext,
-	closestCenter,
-	KeyboardSensor,
-	PointerSensor,
-	useSensor,
-	useSensors,
-	type DragEndEvent,
-} from "@dnd-kit/core"
-import {
-	SortableContext,
-	sortableKeyboardCoordinates,
-	verticalListSortingStrategy,
-	useSortable,
-} from "@dnd-kit/sortable"
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core"
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
 /**
@@ -177,18 +164,8 @@ function SortPopoverContent(): JSX.Element {
  * Internal component that renders search fields
  */
 function SearchFields(): JSX.Element {
-	const {
-		queryFields,
-		sortFields,
-		submit,
-		resetAll,
-		resetFieldValue,
-		isFieldValueValid,
-		hasSubmitted,
-		submittedQueryForm,
-		sortForm,
-		removeSort,
-	} = useSearchContext()
+	const { queryFields, sortFields, submit, resetAll, resetFieldValue, isFieldValueValid, hasSubmitted, submittedQueryForm, sortForm, removeSort } =
+		useSearchContext()
 	const [expanded, setExpanded] = useState(false)
 
 	// Split fields into expandable and standard
@@ -202,8 +179,7 @@ function SearchFields(): JSX.Element {
 			if (!fieldValue) return null
 
 			// For null/notNull conditions, they are always valid regardless of value
-			const isValid =
-				fieldValue.condition === "null" || fieldValue.condition === "notNull" ? true : isFieldValueValid(field.key, fieldValue)
+			const isValid = fieldValue.condition === "null" || fieldValue.condition === "notNull" ? true : isFieldValueValid(field.key, fieldValue)
 
 			if (!isValid) return null
 
@@ -268,15 +244,15 @@ function SearchFields(): JSX.Element {
 		.filter(Boolean) as Array<{ key: string; label: string; field: any; type: "filter" }>
 
 	const { submittedSortForm } = useSearchContext()
-	
+
 	// Create tags for submitted sort form
-	const activeSorts = submittedSortForm.map(sort => {
-		const field = sortFields.find(f => f.key === sort.key)
+	const activeSorts = submittedSortForm.map((sort) => {
+		const field = sortFields.find((f) => f.key === sort.key)
 		return {
 			key: sort.key,
-			label: `${field?.title || sort.key} ${sort.order === 'asc' ? '升序' : '降序'}`,
-			type: 'sort', 
-			field
+			label: `${field?.title || sort.key} ${sort.order === "asc" ? "升序" : "降序"}`,
+			type: "sort",
+			field,
 		}
 	})
 
@@ -384,9 +360,7 @@ function SearchFields(): JSX.Element {
 						gap: "8px",
 					}}
 				>
-					<div style={{ fontSize: "12px", color: "#8c8c8c", fontWeight: 500, marginTop: "4px", whiteSpace: "nowrap" }}>
-						当前筛选:
-					</div>
+					<div style={{ fontSize: "12px", color: "#8c8c8c", fontWeight: 500, marginTop: "4px", whiteSpace: "nowrap" }}>当前筛选:</div>
 					<div style={{ flex: 1 }}>
 						<Space size={[8, 8]} wrap>
 							{allActiveTags.map((tag) => (
@@ -394,18 +368,18 @@ function SearchFields(): JSX.Element {
 									key={`${tag.type}-${tag.key}`}
 									closable
 									onClose={() => {
-										if (tag.type === 'sort') {
+										if (tag.type === "sort") {
 											removeSort(tag.key)
 										} else {
 											resetFieldValue(tag.key)
 										}
 									}}
-									color={tag.type === 'sort' ? "purple" : "processing"}
+									color={tag.type === "sort" ? "purple" : "processing"}
 									style={{
 										margin: 0,
 										borderRadius: "4px",
 										background: "#fff",
-										border: tag.type === 'sort' ? "1px solid #d3adf7" : "1px solid #d1e9ff",
+										border: tag.type === "sort" ? "1px solid #d3adf7" : "1px solid #d1e9ff",
 										padding: "2px 8px",
 									}}
 								>
