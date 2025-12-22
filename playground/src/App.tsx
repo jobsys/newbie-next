@@ -7,15 +7,15 @@
 import React, { useState } from "react"
 import { NewbieProvider } from "../../src/components/provider"
 import { NewbieSearch } from "../../src/components/search"
-import type { SearchFieldConfig, QueryForm } from "../../src/components/search"
+import type { SearchFieldConfig, SortFieldConfig, QueryItem, SortForm } from "../../src/components/search"
 import { Card, Typography, Space, Divider } from "antd"
 
 const { Title, Paragraph, Text } = Typography
 
 export function App() {
-	const [searchResult, setSearchResult] = useState<QueryForm | null>(null)
+	const [searchResult, setSearchResult] = useState<{ query: QueryItem[]; sort: SortForm } | null>(null)
 
-	const searchFields: SearchFieldConfig[] = [
+	const queryFields: SearchFieldConfig[] = [
 		{ key: "name", type: "input", title: "姓名" },
 		{ key: "age", type: "number", title: "年龄" },
 		{
@@ -106,6 +106,12 @@ export function App() {
 		},
 	]
 
+	const sortFields: SortFieldConfig[] = [
+		{ key: "age", title: "年龄" },
+		{ key: "birth_day", title: "出生日期", direction: "desc" },
+		{ key: "created_at", title: "创建时间", direction: "desc" },
+	]
+
 	return (
 		<NewbieProvider
 			config={{
@@ -127,23 +133,22 @@ export function App() {
 					<Space orientation="vertical" size="large" style={{ width: "100%" }}>
 						<div>
 							<Paragraph>
-								<Text strong>字段类型：</Text> Input、Number、Select、Textarea、Cascade、Date
+								<Text strong>功能特性：</Text> 条件筛选、多字段排序、搜索记录持久化
 							</Paragraph>
 							<Paragraph>
-								<Text strong>Textarea：</Text> 支持多行输入，每行一个值，条件为"等于"或"不包含"
-							</Paragraph>
-							<Paragraph>
-								<Text strong>Cascade：</Text> 支持级联选择，条件为"等于"、"不等于"或"包括子级"
+								<Text strong>排序支持：</Text> 点击"排序"按钮可添加多个排序规则
 							</Paragraph>
 						</div>
 
 						<Divider />
 
 						<NewbieSearch
-							fields={searchFields}
-							onSubmit={(query) => {
-								setSearchResult(query)
+							queryFields={queryFields}
+							sortFields={sortFields}
+							onSubmit={(query, sort) => {
+								setSearchResult({ query, sort })
 								console.log("Search query:", query)
+								console.log("Sort config:", sort)
 							}}
 						/>
 
@@ -151,12 +156,19 @@ export function App() {
 							<>
 								<Divider />
 								<div>
-									<Title level={4}>查询结果</Title>
-									<Card>
-										<pre style={{ margin: 0, background: "#f5f5f5", padding: "16px", borderRadius: "4px", fontSize: "12px" }}>
-											{JSON.stringify(searchResult, null, 2)}
-										</pre>
-									</Card>
+									<Title level={4}>查询结果 (onSubmit Payload)</Title>
+									<div style={{ display: 'flex', gap: 16 }}>
+										<Card title="Query (Array Format)" style={{ flex: 1 }}>
+											<pre style={{ margin: 0, background: "#f5f5f5", padding: "16px", borderRadius: "4px", fontSize: "12px", overflow: 'auto' }}>
+												{JSON.stringify(searchResult.query, null, 2)}
+											</pre>
+										</Card>
+										<Card title="Sort Rules" style={{ flex: 1 }}>
+											<pre style={{ margin: 0, background: "#f5f5f5", padding: "16px", borderRadius: "4px", fontSize: "12px", overflow: 'auto' }}>
+												{JSON.stringify(searchResult.sort, null, 2)}
+											</pre>
+										</Card>
+									</div>
 								</div>
 							</>
 						)}

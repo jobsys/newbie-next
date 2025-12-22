@@ -5,17 +5,20 @@
  */
 
 import { useState, useCallback, useMemo, type ReactNode } from "react"
+import { arrayMove } from "@dnd-kit/sortable"
 import { SearchContext, type SearchContextValue } from "./search-context"
-import type { SearchFieldConfig, QueryForm, FieldValue } from "../types"
+import type { SearchFieldConfig, QueryForm, FieldValue, SortForm, SortOrder, SortFieldConfig, QueryItem } from "../types"
 
 /**
  * SearchProvider props
  */
 export interface SearchProviderProps {
-	/** Field configurations */
-	fields: SearchFieldConfig[]
+	/** Search field configurations */
+	queryFields: SearchFieldConfig[]
+	/** Sort field configurations */
+	sortFields?: SortFieldConfig[]
 	/** Submit callback */
-	onSubmit?: (query: QueryForm) => void
+	onSubmit?: (query: QueryItem[], sort: SortForm) => void
 	/** Initial query form */
 	initialQueryForm?: QueryForm
 	/** Children components */
@@ -24,29 +27,15 @@ export interface SearchProviderProps {
 
 /**
  * SearchProvider Component
- *
- * Provides search state management context for NewbieSearch
- *
- * @param props - Component props
- * @returns Provider component
- *
- * @example
- * ```tsx
- * <SearchProvider
- *   fields={fields}
- *   onSubmit={(query) => console.log(query)}
- * >
- *   <SearchFields />
- * </SearchProvider>
- * ```
+// ... (keeping existing comments if possible, but replace_file_content replaces block)
  */
 export function SearchProvider(props: SearchProviderProps): JSX.Element {
-	const { fields, onSubmit, initialQueryForm = {}, children } = props
+	const { queryFields, sortFields = [], onSubmit, initialQueryForm = {}, children } = props
 
-	// Initialize query form from fields
+    // ... (keep initialForm memo)
 	const initialForm = useMemo<QueryForm>(() => {
 		const form: QueryForm = { ...initialQueryForm }
-		fields.forEach((field) => {
+		queryFields.forEach((field) => {
 			if (!form[field.key]) {
 				form[field.key] = {
 					value: field.defaultValue ?? (field.type === "number" ? undefined : ""),
@@ -55,12 +44,73 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 			}
 		})
 		return form
-	}, [fields, initialQueryForm])
+	}, [queryFields, initialQueryForm])
 
 	const [queryForm, setQueryForm] = useState<QueryForm>(initialForm)
 	const [hasSubmitted, setHasSubmitted] = useState(false)
 	const [submittedQueryForm, setSubmittedQueryForm] = useState<QueryForm>({})
 
+	// Sort state reference from fields
+	const initialSortForm = useMemo<SortForm>(() => {
+		return (
+			sortFields
+				?.filter((f) => f.direction)
+				.map((f) => ({
+					key: f.key,
+					order: f.direction!,
+				})) || []
+		)
+	}, [sortFields])
+
+	const [sortForm, setSortForm] = useState<SortForm>(initialSortForm)
+	const [submittedSortForm, setSubmittedSortForm] = useState<SortForm>(initialSortForm)
+
+    // ... (keep addSort, removeSort, updateSort, toggleSort)
+	// Add sort field
+	const addSort = useCallback(
+		(key: string) => {
+			setSortForm((prev) => {
+				if (prev.find((s) => s.key === key)) return prev
+				const field = sortFields.find((f) => f.key === key)
+				const defaultOrder = field?.direction || "asc"
+				return [...prev, { key, order: defaultOrder }]
+			})
+		},
+		[sortFields],
+	)
+
+	// Remove sort field
+	const removeSort = useCallback((key: string) => {
+		setSortForm((prev) => prev.filter((s) => s.key !== key))
+		setSubmittedSortForm((prev) => prev.filter((s) => s.key !== key))
+	}, [])
+
+	// Update sort field
+	const updateSort = useCallback((key: string, order: SortOrder) => {
+		setSortForm((prev) => prev.map((s) => (s.key === key ? { ...s, order } : s)))
+	}, [])
+
+	// Reorder sort field
+	const reorderSort = useCallback((oldIndex: number, newIndex: number) => {
+		setSortForm((prev) => arrayMove(prev, oldIndex, newIndex))
+	}, [])
+
+	// Toggle sort field
+	const toggleSort = useCallback(
+		(key: string) => {
+			setSortForm((prev) => {
+				const existing = prev.find((s) => s.key === key)
+				if (existing) {
+					return prev.map((s) => (s.key === key ? { ...s, order: s.order === "asc" ? "desc" : "asc" } : s))
+				}
+				const field = sortFields.find((f) => f.key === key)
+				return [...prev, { key, order: field?.direction || "asc" }]
+			})
+		},
+		[sortFields],
+	)
+
+    // ... (keep getFieldValue, updateFieldValue, resetFieldValue, resetAll, isFieldValueValid)
 	// Get field value
 	const getFieldValue = useCallback(
 		(key: string): FieldValue | undefined => {
@@ -80,7 +130,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	// Reset field value
 	const resetFieldValue = useCallback(
 		(key: string) => {
-			const field = fields.find((f) => f.key === key)
+			const field = queryFields.find((f) => f.key === key)
 			if (field) {
 				setQueryForm((prev) => ({
 					...prev,
@@ -102,27 +152,29 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 				})
 			}
 		},
-		[fields],
+		[queryFields],
 	)
 
 	// Reset all fields
 	const resetAll = useCallback(() => {
 		const form: QueryForm = {}
-		fields.forEach((field) => {
+		queryFields.forEach((field) => {
 			form[field.key] = {
 				value: field.defaultValue ?? (field.type === "number" ? undefined : ""),
 				condition: field.defaultCondition ?? "equal",
 			}
 		})
 		setQueryForm(form)
+		setSortForm([])
 		setHasSubmitted(false)
 		setSubmittedQueryForm({})
-	}, [fields])
+		setSubmittedSortForm([])
+	}, [queryFields])
 
 	// Helper to check if a field has valid content
 	const isFieldValueValid = useCallback(
 		(fieldKey: string, fieldValue: FieldValue) => {
-			const field = fields.find((f) => f.key === fieldKey)
+			const field = queryFields.find((f) => f.key === fieldKey)
 			if (!field) return false
 
 			const { value, condition } = fieldValue
@@ -162,35 +214,41 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 
 			return true
 		},
-		[fields],
+		[queryFields],
 	)
 
 	// Submit search
 	const submit = useCallback(() => {
 		const filteredQuery: QueryForm = {}
+		const queryItems: QueryItem[] = []
 
 		Object.entries(queryForm).forEach(([key, fieldValue]) => {
 			if (isFieldValueValid(key, fieldValue)) {
 				// For null/notNull conditions, ensure value is undefined
 				if (fieldValue.condition === "null" || fieldValue.condition === "notNull") {
-					filteredQuery[key] = {
+					const val = {
 						condition: fieldValue.condition,
 						value: undefined,
 					}
+					filteredQuery[key] = val
+					queryItems.push({ key, ...val })
 				} else {
 					// For textarea fields, convert multi-line text to array (one item per line)
-					const field = fields.find((f) => f.key === key)
+					const field = queryFields.find((f) => f.key === key)
 					if (field?.type === "textarea" && typeof fieldValue.value === "string") {
 						const lines = fieldValue.value
 							.split("\n")
 							.map((line) => line.trim())
 							.filter((line) => line !== "")
-						filteredQuery[key] = {
+						const val = {
 							...fieldValue,
 							value: lines,
 						}
+						filteredQuery[key] = val
+						queryItems.push({ key, ...val })
 					} else {
 						filteredQuery[key] = fieldValue
+						queryItems.push({ key, ...fieldValue })
 					}
 				}
 			}
@@ -198,9 +256,10 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 
 		// Save the submitted query form snapshot
 		setSubmittedQueryForm(filteredQuery)
+		setSubmittedSortForm(sortForm)
 		setHasSubmitted(true)
-		onSubmit?.(filteredQuery)
-	}, [queryForm, onSubmit, isFieldValueValid, fields])
+		onSubmit?.(queryItems, sortForm)
+	}, [queryForm, sortForm, onSubmit, isFieldValueValid, queryFields])
 
 	// Context value
 	const contextValue = useMemo<SearchContextValue>(
@@ -211,12 +270,38 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 			resetFieldValue,
 			resetAll,
 			submit,
-			fields,
+			queryFields,
+			sortFields,
 			isFieldValueValid,
 			hasSubmitted,
 			submittedQueryForm,
+			sortForm,
+			submittedSortForm,
+			addSort,
+			removeSort,
+			updateSort,
+			reorderSort,
+			toggleSort,
 		}),
-		[queryForm, getFieldValue, updateFieldValue, resetFieldValue, resetAll, submit, fields, isFieldValueValid, hasSubmitted, submittedQueryForm],
+		[
+			queryForm,
+			getFieldValue,
+			updateFieldValue,
+			resetFieldValue,
+			resetAll,
+			submit,
+			queryFields,
+			sortFields,
+			isFieldValueValid,
+			hasSubmitted,
+			submittedQueryForm,
+			sortForm,
+			submittedSortForm,
+			addSort,
+			removeSort,
+			updateSort,
+			toggleSort,
+		],
 	)
 
 	return <SearchContext.Provider value={contextValue}>{children}</SearchContext.Provider>

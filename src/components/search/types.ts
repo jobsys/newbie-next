@@ -51,6 +51,51 @@ export interface FieldValue {
  * }
  * ```
  */
+/**
+ * Sort order type
+ */
+export type SortOrder = "asc" | "desc"
+
+/**
+ * Sort field configuration
+ */
+export interface SortFieldConfig {
+	/** Field unique identifier */
+	key: string
+	/** Field title */
+	title: string
+	/** Default sort direction */
+	direction?: SortOrder
+}
+
+/**
+ * Sort field structure
+ */
+export interface SortField {
+	/** Field key */
+	key: string
+	/** Sort order */
+	order: SortOrder
+}
+
+/**
+ * Sort form structure (array of sort fields)
+ */
+export type SortForm = SortField[]
+
+/**
+ * Search field configuration
+ *
+ * @example
+ * ```tsx
+ * const field: SearchFieldConfig = {
+ *   key: 'name',
+ *   type: 'input',
+ *   title: '姓名',
+ *   conditions: ['equal', 'include']
+ * }
+ * ```
+ */
 export interface SearchFieldConfig {
 	/** Field unique identifier */
 	key: string
@@ -90,24 +135,41 @@ export interface QueryForm {
 }
 
 /**
+ * Query item structure for submission
+ */
+export interface QueryItem {
+	/** Field key */
+	key: string
+	/** Field value */
+	value: any
+	/** Search condition */
+	condition: string
+}
+
+/**
  * NewbieSearch component props
  *
  * @example
  * ```tsx
  * <NewbieSearch
- *   fields={[
+ *   queryFields={[
  *     { key: 'name', type: 'input', title: '姓名' },
  *     { key: 'age', type: 'number', title: '年龄' }
  *   ]}
- *   onSubmit={(query) => console.log(query)}
+ *   sortFields={[
+ *     { key: 'createdAt', title: '创建时间', direction: 'desc' }
+ *   ]}
+ *   onSubmit={(query, sort) => console.log(query, sort)}
  * />
  * ```
  */
 export interface NewbieSearchProps {
 	/** Search field configurations */
-	fields: SearchFieldConfig[]
+	queryFields: SearchFieldConfig[]
+	/** Sort field configurations */
+	sortFields?: SortFieldConfig[]
 	/** Submit callback */
-	onSubmit?: (query: QueryForm) => void
+	onSubmit?: (query: QueryItem[], sort: SortForm) => void
 	/** Whether to disable condition selection */
 	disableConditions?: boolean
 	/** Auto query on change */
