@@ -228,6 +228,7 @@ export function SearchDemo() {
 			<NewbieSearch
 				queryFields={queryFields}
 				sortFields={sortFields}
+				autoQuery={false}
 				onSubmit={(query, sort) => {
 					setSearchResult({ query, sort })
 					console.log("Search query:", query)

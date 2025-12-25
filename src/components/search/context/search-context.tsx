@@ -27,6 +27,10 @@ export interface SearchContextValue {
 	queryFields: SearchFieldConfig[]
 	/** Sort field configurations */
 	sortFields: SortFieldConfig[]
+	/** Whether to disable condition selection for all fields */
+	disableConditions: boolean
+	/** Whether to auto query on change */
+	autoQuery: boolean
 	/** Helper to check if a field has valid content */
 	isFieldValueValid: (key: string, value: FieldValue) => boolean
 	/** Whether search has been submitted */

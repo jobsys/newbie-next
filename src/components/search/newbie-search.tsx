@@ -1,7 +1,7 @@
 /**
  * NewbieSearch Component
  *
- * Advanced search component with condition filtering, sorting, and persistence
+ * Advanced search component with condition filtering and sorting
  *
  * @example
  * ```tsx
@@ -164,8 +164,19 @@ function SortPopoverContent(): JSX.Element {
  * Internal component that renders search fields
  */
 function SearchFields(): JSX.Element {
-	const { queryFields, sortFields, submit, resetAll, resetFieldValue, isFieldValueValid, hasSubmitted, submittedQueryForm, sortForm, removeSort } =
-		useSearchContext()
+	const {
+		queryFields,
+		sortFields,
+		submit,
+		resetAll,
+		resetFieldValue,
+		isFieldValueValid,
+		hasSubmitted,
+		submittedQueryForm,
+		sortForm,
+		removeSort,
+		autoQuery,
+	} = useSearchContext()
 	const [expanded, setExpanded] = useState(false)
 
 	// Split fields into expandable and standard
@@ -373,7 +384,17 @@ function SearchFields(): JSX.Element {
 					</Button>
 					<Space>
 						{sortFields.length > 0 && (
-							<Popover content={<SortPopoverContent />} trigger="click" placement="bottomRight" arrow={false}>
+							<Popover
+								content={<SortPopoverContent />}
+								trigger="click"
+								placement="bottomRight"
+								arrow={false}
+								onOpenChange={(open) => {
+									if (!open && autoQuery) {
+										submit()
+									}
+								}}
+							>
 								<Button icon={<ArrowUpDown size={14} />}>
 									排序
 									{sortForm.length > 0 && (
@@ -451,7 +472,7 @@ function SearchFields(): JSX.Element {
 /**
  * NewbieSearch Component
  *
- * Advanced search component with condition filtering, sorting, and persistence
+ * Advanced search component with condition filtering and sorting
  *
  * @param props - Component props
  * @returns Search component
@@ -471,10 +492,16 @@ function SearchFields(): JSX.Element {
  * ```
  */
 export function NewbieSearch(props: NewbieSearchProps): JSX.Element {
-	const { queryFields, sortFields, onSubmit } = props
+	const { queryFields, sortFields, onSubmit, disableConditions, autoQuery } = props
 
 	return (
-		<SearchProvider queryFields={queryFields} sortFields={sortFields} onSubmit={onSubmit}>
+		<SearchProvider
+			queryFields={queryFields}
+			sortFields={sortFields}
+			onSubmit={onSubmit}
+			disableConditions={disableConditions}
+			autoQuery={autoQuery}
+		>
 			<SearchFields />
 		</SearchProvider>
 	)

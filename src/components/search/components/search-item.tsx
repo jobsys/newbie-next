@@ -90,7 +90,13 @@ export interface SearchItemProps {
 export function SearchItem(props: SearchItemProps): JSX.Element {
 	const { field } = props
 	const fieldState = useSearchField({ field })
-	const { getFieldValue: getFieldValueDirect, updateFieldValue: updateFieldValueDirect } = useSearchContext()
+	const {
+		getFieldValue: getFieldValueDirect,
+		updateFieldValue: updateFieldValueDirect,
+		disableConditions: globalDisableConditions,
+		autoQuery,
+		submit,
+	} = useSearchContext()
 	const [isOpen, setIsOpen] = useState(false)
 	const [selectOpen, setSelectOpen] = useState(false)
 	const [datePickerOpen, setDatePickerOpen] = useState(false)
@@ -180,7 +186,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	const getPopupContainer = () => panelRef.current || document.body
 
 	const renderConditionSelector = () => {
-		if (field.disableConditions || field.render) return null
+		if (field.disableConditions || globalDisableConditions || field.render) return null
 		const menuItems: MenuProps["items"] = fieldState.conditions.map((condition) => ({
 			key: condition.value,
 			label: (
@@ -189,7 +195,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 					{condition.label}
 				</span>
 			),
-			onClick: ({ key }: { key: string }) => fieldState.setCondition(key),
+			onClick: ({ key }) => fieldState.setCondition(key as SearchCondition),
 		}))
 
 		return (
@@ -406,7 +412,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 									{field.title}
 								</span>
 							</div>
-							{!field.disableConditions && renderConditionSelector()}
+							{!field.disableConditions && !globalDisableConditions && renderConditionSelector()}
 						</div>
 						<div>{renderInput()}</div>
 					</>
@@ -426,7 +432,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						{condition.label}
 					</span>
 				),
-				onClick: ({ key }) => fieldState.setCondition(key),
+				onClick: ({ key }) => fieldState.setCondition(key as SearchCondition),
 			}))
 			return (
 				<div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
@@ -486,6 +492,12 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				fieldState.setValue(newValue)
 				if (fieldState.condition !== "equal" && fieldState.condition !== "notEqual") fieldState.setCondition("equal")
 			}
+
+			// For tiled select, trigger auto query immediately as there is no popover to close
+			if (autoQuery) {
+				// Use a small timeout to ensure state is updated
+				setTimeout(() => submit(), 0)
+			}
 		}
 		return (
 			<div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
@@ -525,7 +537,13 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				content={renderPanelContent()}
 				trigger="click"
 				open={isOpen}
-				onOpenChange={setIsOpen}
+				onOpenChange={(open) => {
+					setIsOpen(open)
+					// Trigger auto query only when popover closes
+					if (!open && autoQuery) {
+						submit()
+					}
+				}}
 				placement="bottomLeft"
 				overlayStyle={{ padding: 0 }}
 				overlayClassName="newbie-search-popover"

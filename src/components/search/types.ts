@@ -45,7 +45,8 @@ export interface Condition {
  * ```tsx
  * const fieldValue: FieldValue = {
  *   value: '张三',
- *   condition: 'equal'
+ *   condition: 'equal',
+ *   type: 'input'
  * }
  * ```
  */
@@ -191,12 +192,8 @@ export interface NewbieSearchProps {
 	sortFields?: SortFieldConfig[]
 	/** Submit callback */
 	onSubmit?: (query: QueryForm, sort: SortForm) => void
-	/** Whether to disable condition selection */
+	/** Whether to disable condition selection for all fields */
 	disableConditions?: boolean
 	/** Auto query on change */
 	autoQuery?: boolean
-	/** Gutter between fields */
-	gutter?: number | string
-	/** Persistence configuration */
-	persistence?: boolean | string
 }
