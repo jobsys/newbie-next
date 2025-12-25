@@ -5,7 +5,7 @@
  */
 
 import { createContext, useContext } from "react"
-import type { SearchFieldConfig, QueryForm, FieldValue, SortForm, SortOrder, SortFieldConfig } from "../types"
+import type { SearchFieldConfig, QueryForm, FieldValue, SortForm, SortOrder, SortFieldConfig, SearchCondition } from "../types"
 
 /**
  * Search context value
@@ -16,7 +16,7 @@ export interface SearchContextValue {
 	/** Get field value */
 	getFieldValue: (key: string) => FieldValue | undefined
 	/** Update field value */
-	updateFieldValue: (key: string, value: any, condition?: string) => void
+	updateFieldValue: (key: string, value: any, condition?: SearchCondition, type?: string) => void
 	/** Reset field value */
 	resetFieldValue: (key: string) => void
 	/** Reset all fields */

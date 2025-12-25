@@ -4,6 +4,24 @@
 
 /**
  * Search condition type
+ */
+export type SearchCondition =
+	| "equal"
+	| "notEqual"
+	| "include"
+	| "exclude"
+	| "greaterThan"
+	| "lessThan"
+	| "greaterThanOrEqual"
+	| "lessThanOrEqual"
+	| "between"
+	| "in"
+	| "notIn"
+	| "null"
+	| "notNull"
+
+/**
+ * Search condition structure
  *
  * @example
  * ```tsx
@@ -15,7 +33,7 @@
  */
 export interface Condition {
 	/** Condition value */
-	value: string
+	value: SearchCondition
 	/** Condition label */
 	label: string
 }
@@ -35,7 +53,9 @@ export interface FieldValue {
 	/** Field value */
 	value: any
 	/** Search condition */
-	condition: string
+	condition: SearchCondition
+	/** Field type */
+	type?: string
 }
 
 /**
@@ -104,11 +124,11 @@ export interface SearchFieldConfig {
 	/** Field title */
 	title: string
 	/** Available conditions */
-	conditions?: string[]
+	conditions?: SearchCondition[]
 	/** Default value */
 	defaultValue?: any
 	/** Default condition */
-	defaultCondition?: string
+	defaultCondition?: SearchCondition
 	/** Whether to disable condition selection */
 	disableConditions?: boolean
 	/** Whether to show options as tiled (for type: 'select') */
@@ -119,8 +139,8 @@ export interface SearchFieldConfig {
 	render?: (props: {
 		/** Get value of any field */
 		getFieldValue: (key: string) => any
-		/** Update value and condition of any field */
-		updateFieldValue: (key: string, value: any, condition?: string) => void
+		/** Update value, condition and type of any field */
+		updateFieldValue: (key: string, value: any, condition?: SearchCondition, type?: string) => void
 		/** Close the popup panel */
 		close: () => void
 	}) => any
@@ -148,18 +168,6 @@ export interface QueryForm {
 }
 
 /**
- * Query item structure for submission
- */
-export interface QueryItem {
-	/** Field key */
-	key: string
-	/** Field value */
-	value: any
-	/** Search condition */
-	condition: string
-}
-
-/**
  * NewbieSearch component props
  *
  * @example
@@ -182,7 +190,7 @@ export interface NewbieSearchProps {
 	/** Sort field configurations */
 	sortFields?: SortFieldConfig[]
 	/** Submit callback */
-	onSubmit?: (query: QueryItem[], sort: SortForm) => void
+	onSubmit?: (query: QueryForm, sort: SortForm) => void
 	/** Whether to disable condition selection */
 	disableConditions?: boolean
 	/** Auto query on change */

@@ -2,7 +2,7 @@
  * Search conditions utilities
  */
 
-import type { Condition } from "../types"
+import type { Condition, SearchCondition } from "../types"
 
 /**
  * Default conditions for different field types
@@ -65,10 +65,10 @@ export const DEFAULT_CONDITIONS: Record<string, Condition[]> = {
  * const conditions = getFieldConditions('input', ['equal', 'include'])
  * ```
  */
-export function getFieldConditions(fieldType: string, customConditions?: string[]): Condition[] {
+export function getFieldConditions(fieldType: string, customConditions?: SearchCondition[]): Condition[] {
 	if (customConditions) {
 		const allConditions = DEFAULT_CONDITIONS[fieldType] || []
-		return allConditions.filter((c) => customConditions.includes(c.value))
+		return allConditions.filter((c) => customConditions.includes(c.value as SearchCondition))
 	}
 	return DEFAULT_CONDITIONS[fieldType] || DEFAULT_CONDITIONS.input
 }
@@ -80,7 +80,7 @@ export function getFieldConditions(fieldType: string, customConditions?: string[
  * @param fieldType - Field type
  * @returns Condition label
  */
-export function getConditionLabel(value: string, fieldType: string = "input"): string {
+export function getConditionLabel(value: SearchCondition, fieldType: string = "input"): string {
 	const conditions = DEFAULT_CONDITIONS[fieldType] || DEFAULT_CONDITIONS.input
 	const condition = conditions.find((c) => c.value === value)
 	return condition?.label || value

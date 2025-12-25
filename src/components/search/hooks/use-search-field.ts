@@ -28,7 +28,7 @@
 import { useMemo, useCallback } from "react"
 import { useSearchContext } from "../context/search-context"
 import { getFieldConditions, getConditionLabel } from "../utils/conditions"
-import type { SearchFieldConfig } from "../types"
+import type { SearchFieldConfig, SearchCondition } from "../types"
 
 /**
  * Hook options
@@ -45,13 +45,13 @@ export interface UseSearchFieldReturn {
 	/** Field value */
 	value: any
 	/** Current condition */
-	condition: string
+	condition: SearchCondition
 	/** Available conditions */
-	conditions: Array<{ value: string; label: string }>
+	conditions: Array<{ value: SearchCondition; label: string }>
 	/** Update value */
 	setValue: (value: any) => void
 	/** Update condition */
-	setCondition: (condition: string) => void
+	setCondition: (condition: SearchCondition) => void
 	/** Display value for overlay */
 	displayValue: string
 	/** Whether the field is valid (has value or special condition) */
@@ -72,7 +72,7 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 
 	// Current value and condition
 	const value = fieldValue?.value ?? field.defaultValue ?? ""
-	const condition = fieldValue?.condition ?? field.defaultCondition ?? "equal"
+	const condition: SearchCondition = fieldValue?.condition ?? field.defaultCondition ?? "equal"
 
 	// Get available conditions
 	const conditions = useMemo(() => getFieldConditions(field.type, field.conditions), [field.type, field.conditions])
@@ -83,6 +83,7 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 			updateFieldValue(field.key, {
 				value: newValue,
 				condition,
+				type: field.type,
 			})
 		},
 		[field.key, condition, updateFieldValue],
@@ -90,12 +91,13 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 
 	// Update condition
 	const setCondition = useCallback(
-		(newCondition: string) => {
+		(newCondition: SearchCondition) => {
 			// If switching to null/notNull, clear the value
 			if (newCondition === "null" || newCondition === "notNull") {
 				updateFieldValue(field.key, {
 					value: undefined,
 					condition: newCondition,
+					type: field.type,
 				})
 				return
 			}
@@ -133,6 +135,7 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 			updateFieldValue(field.key, {
 				value: newValue,
 				condition: newCondition,
+				type: field.type,
 			})
 		},
 		[field.key, field.type, field.defaultValue, value, condition, updateFieldValue],

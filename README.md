@@ -99,20 +99,55 @@ Advanced search component with condition filtering, sorting, and persistence.
 **Features:**
 
 - Condition filtering system (equal, notEqual, like, between, etc.)
-- Expandable search items
-- Sorting functionality
-- Persistence support
+- Expandable search items (tiled selection)
+- Multi-field sorting functionality with drag-and-drop
+- Custom render support for complex search scenarios
+- Search record persistence
 - Responsive layout
+
+**Props:**
+
+| Property | Description | Type | Default |
+| --- | --- | --- | --- |
+| `queryFields` | Search field configurations | `SearchFieldConfig[]` | `[]` |
+| `sortFields` | Sort field configurations | `SortFieldConfig[]` | `[]` |
+| `onSubmit` | Submit callback | `(query: QueryForm, sort: SortForm) => void` | - |
+| `autoQuery` | Whether to trigger search automatically on change | `boolean` | `false` |
+| `disableConditions` | Global toggle to disable condition selectors | `boolean` | `false` |
+| `persistence` | Persistence key or boolean to enable storage | `boolean \| string` | `false` |
+
+**SearchFieldConfig:**
+
+| Property | Description | Type |
+| --- | --- | --- |
+| `key` | Unique field identifier | `string` |
+| `type` | Field type | `'input'\|'number'\|'date'\|'select'\|'cascade'\|'textarea'` |
+| `title`| Field label | `string` |
+| `render` | Custom render function for the popup panel | `(props: { updateFieldValue, getFieldValue, close }) => ReactNode` |
+| `getDisplayValue` | Custom display value logic for the mask | `(getFieldValue) => string` |
+| `expandable` | Show options as tiled tags (for select) | `boolean \| 'single' \| 'multiple'` |
 
 **Example:**
 
 ```tsx
 <NewbieSearch
-  fields={[
+  queryFields={[
     { key: 'name', type: 'input', title: '姓名' },
-    { key: 'age', type: 'number', title: '年龄' },
+    { 
+      key: 'score', 
+      type: 'number', 
+      title: '分数',
+      render: ({ updateFieldValue }) => (
+        <Button onClick={() => updateFieldValue('score', 100, 'equal', 'number')}>
+          Set 100
+        </Button>
+      )
+    },
   ]}
-  onSubmit={(query) => console.log(query)}
+  onSubmit={(query, sort) => {
+    // query format: { name: { value: '...', condition: '...', type: 'input' } }
+    console.log(query, sort)
+  }}
 />
 ```
 

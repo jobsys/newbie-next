@@ -33,7 +33,7 @@ import {
 } from "lucide-react"
 import { useSearchField } from "../hooks/use-search-field"
 import { useSearchContext } from "../context/search-context"
-import type { SearchFieldConfig } from "../types"
+import type { SearchFieldConfig, SearchCondition } from "../types"
 import type { MenuProps } from "antd"
 
 const { RangePicker } = DatePicker
@@ -43,7 +43,7 @@ const { RangePicker } = DatePicker
  *
  * Returns a Lucide icon component with appropriate styling for Ant Design components
  */
-function getConditionIcon(condition: string) {
+function getConditionIcon(condition: SearchCondition) {
 	const iconProps = { size: 14, strokeWidth: 2, style: { display: "inline-block" } }
 
 	switch (condition) {
@@ -56,8 +56,10 @@ function getConditionIcon(condition: string) {
 		case "exclude":
 			return <Grid2X2X {...iconProps} />
 		case "greaterThan":
+		case "greaterThanOrEqual":
 			return <ChevronRight {...iconProps} />
 		case "lessThan":
+		case "lessThanOrEqual":
 			return <ChevronLeft {...iconProps} />
 		case "between":
 			return <ChevronsLeftRightEllipsis {...iconProps} />

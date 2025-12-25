@@ -15,7 +15,7 @@
  * ```
  */
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button, Space, Tag, Popover, Select, Divider, Typography } from "antd"
 import { Search, RotateCw, ChevronDown, ChevronUp, XCircle, ArrowUpDown, SortAsc, SortDesc, Trash2, Plus, GripVertical } from "lucide-react"
 import { SearchProvider } from "./context/search-provider"
@@ -180,12 +180,18 @@ function SearchFields(): JSX.Element {
 			const fieldValue = submittedQueryForm[field.key]
 			const customDisplay = field.getDisplayValue ? field.getDisplayValue(getSubmittedFieldValue) : null
 
-			// For fields with custom render, check if they have a custom display value in the submitted snapshot
+			// For fields with custom render, try to use custom display first, then fallback to value
 			if (field.render) {
-				if (!customDisplay) return null
+				const valueDisplay =
+					customDisplay ||
+					(fieldValue?.value !== undefined && fieldValue?.value !== null && fieldValue?.value !== "" ? String(fieldValue.value) : "")
+
+				// If no value and not a null/notNull condition, don't show tag
+				if (!valueDisplay && fieldValue?.condition !== "null" && fieldValue?.condition !== "notNull") return null
+
 				return {
 					key: field.key,
-					label: `${field.title}: ${customDisplay}`,
+					label: valueDisplay ? `${field.title}: ${valueDisplay}` : field.title,
 					field,
 					type: "filter",
 				}
@@ -275,13 +281,34 @@ function SearchFields(): JSX.Element {
 
 	const allActiveTags = [...activeConditions, ...activeSorts]
 
+	const containerRef = useRef<HTMLDivElement>(null)
+	const [initialVisibleCount, setInitialVisibleCount] = useState(4)
+
+	useEffect(() => {
+		if (!containerRef.current) return
+
+		const observer = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const width = entry.contentRect.width
+				if (width === 0) return
+				// Grid has gap 16px, and minmax(220px, 1fr)
+				// Count = floor((width + gap) / (minWidth + gap))
+				const count = Math.floor((width + 16) / (220 + 16))
+				setInitialVisibleCount(Math.max(1, count))
+			}
+		})
+
+		observer.observe(containerRef.current)
+		return () => observer.disconnect()
+	}, [])
+
 	// Calculate visible standard fields
-	const initialVisibleCount = 4
 	const visibleStandardFields = expanded ? standardFields : standardFields.slice(0, initialVisibleCount)
 	const hasMoreStandard = standardFields.length > initialVisibleCount
 
 	return (
 		<div
+			ref={containerRef}
 			style={{
 				background: "#fff",
 				padding: "16px",
