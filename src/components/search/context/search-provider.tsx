@@ -1,22 +1,14 @@
-/**
- * SearchProvider
- *
- * Provides search state management context
- */
-
-import { useState, useCallback, useMemo, type ReactNode } from "react"
+import { useState, useCallback, useMemo, useEffect, useRef, type ReactNode } from "react"
 import { arrayMove } from "@dnd-kit/sortable"
-import { SearchContext, type SearchContextValue } from "./search-context"
-import type { SearchFieldConfig, QueryForm, FieldValue, SortForm, SortOrder, SortFieldConfig, SearchCondition } from "../types"
+import { SearchContext } from "./search-context"
+import type { QueryForm, FieldValue, SortForm, SortOrder, SearchCondition, NewbieProColumn } from "../types"
 
 /**
  * SearchProvider props
  */
 export interface SearchProviderProps {
-	/** Search field configurations */
-	queryFields: SearchFieldConfig[]
-	/** Sort field configurations */
-	sortFields?: SortFieldConfig[]
+	/** Table columns configuration */
+	columns: NewbieProColumn<any, any>[]
 	/** Submit callback */
 	onSubmit?: (query: QueryForm, sort: SortForm) => void
 	/** Initial query form */
@@ -33,30 +25,50 @@ export interface SearchProviderProps {
  * SearchProvider Component
  */
 export function SearchProvider(props: SearchProviderProps): JSX.Element {
-	const {
-		queryFields: rawQueryFields,
-		sortFields = [],
-		onSubmit,
-		initialQueryForm = {},
-		disableConditions = false,
-		autoQuery = false,
-		children,
-	} = props
+	const { columns, onSubmit, initialQueryForm = {}, disableConditions = false, autoQuery = false, children } = props
 
-	// Sort query fields by order (larger number comes first)
-	const queryFields = useMemo(() => {
-		return [...rawQueryFields].sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
-	}, [rawQueryFields])
+	// Internal state for dynamic field options
+	const [fieldOptions, setFieldOptions] = useState<Record<string, any[]>>({})
+	const loadingRef = useRef<Record<string, boolean>>({})
 
-	// Initialize query form with default values
+	// 1. Parse columns into internal queryFields and sortFields
+	const { queryFields, sortFields } = useMemo(() => {
+		const qFields: any[] = []
+		const sFields: any[] = []
+
+		columns.forEach((col) => {
+			const { dataIndex, key, hideInSearch, sorter } = col
+			const fieldKey = (dataIndex as string) || (key as string)
+
+			if (!fieldKey || fieldKey === "action" || fieldKey === "option") return
+
+			// Handle Sort
+			if (sorter) {
+				sFields.push(col)
+			}
+
+			// Handle Search
+			if (hideInSearch !== true) {
+				qFields.push(col)
+			}
+		})
+
+		return {
+			queryFields: qFields.sort((a, b) => (b.order ?? 0) - (a.order ?? 0)),
+			sortFields: sFields,
+		}
+	}, [columns])
+
+	// 2. Initialize query form from columns
 	const initialForm = useMemo<QueryForm>(() => {
 		const form: QueryForm = { ...initialQueryForm }
 		queryFields.forEach((field) => {
-			if (!form[field.key]) {
-				form[field.key] = {
-					value: field.defaultValue ?? (field.type === "number" ? undefined : ""),
-					condition: disableConditions ? "equal" : (field.defaultCondition ?? "equal"),
-					type: field.type,
+			const fieldKey = (field.dataIndex as string) || (field.key as string)
+			if (!form[fieldKey]) {
+				form[fieldKey] = {
+					value: field.initialValue ?? (field.valueType === "digit" || field.valueType === "money" ? undefined : ""),
+					condition: disableConditions ? "equal" : (field.fieldProps?.defaultCondition ?? "equal"),
+					type: (field.valueType as string) || "text",
 				}
 			}
 		})
@@ -67,47 +79,110 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	const [hasSubmitted, setHasSubmitted] = useState(false)
 	const [submittedQueryForm, setSubmittedQueryForm] = useState<QueryForm>({})
 
-	// Sort state reference from fields
+	// 3. Initialize sort form from columns (search for defaultSortOrder)
 	const initialSortForm = useMemo<SortForm>(() => {
-		return (
-			sortFields
-				?.filter((f) => f.direction)
-				.map((f) => ({
-					key: f.key,
-					order: f.direction!,
-				})) || []
-		)
+		const sorts: SortForm = []
+		sortFields.forEach((field) => {
+			if (field.defaultSortOrder) {
+				sorts.push({
+					key: (field.dataIndex as string) || (field.key as string),
+					order: field.defaultSortOrder === "ascend" ? "asc" : "desc",
+				})
+			}
+		})
+		return sorts
 	}, [sortFields])
 
 	const [sortForm, setSortForm] = useState<SortForm>(initialSortForm)
 	const [submittedSortForm, setSubmittedSortForm] = useState<SortForm>(initialSortForm)
 
 	/**
-	 * Internal submit implementation that consumes specific form values
+	 * Dynamic Request Handling
+	 */
+	const loadOptions = useCallback(async (field: NewbieProColumn, currentParams: any = {}) => {
+		const fieldKey = (field.dataIndex as string) || (field.key as string)
+		if (!field.request || loadingRef.current[fieldKey]) return
+
+		loadingRef.current[fieldKey] = true
+		try {
+			const options = await field.request(currentParams, {})
+			if (Array.isArray(options)) {
+				setFieldOptions((prev) => ({ ...prev, [fieldKey]: options }))
+			}
+		} catch (error) {
+			console.error(`Failed to load options for ${fieldKey}:`, error)
+		} finally {
+			loadingRef.current[fieldKey] = false
+		}
+	}, [])
+
+	/**
+	 * Initialize field options from columns (static)
+	 */
+	useEffect(() => {
+		const staticOptions: Record<string, any[]> = {}
+		queryFields.forEach((field) => {
+			const key = (field.dataIndex as string) || (field.key as string)
+			if (field.fieldProps?.options) {
+				staticOptions[key] = field.fieldProps.options
+			} else if (field.valueEnum) {
+				staticOptions[key] = Object.entries(field.valueEnum).map(([value, config]) => {
+					if (typeof config === "object" && config !== null) {
+						return {
+							label: (config as any).text,
+							value: isNaN(Number(value)) ? value : Number(value),
+							...(config as any),
+						}
+					}
+					return {
+						label: String(config),
+						value: isNaN(Number(value)) ? value : Number(value),
+					}
+				})
+			}
+		})
+		if (Object.keys(staticOptions).length > 0) {
+			setFieldOptions((prev) => ({ ...prev, ...staticOptions }))
+		}
+	}, [queryFields])
+
+	/**
+	 * Watch for params changes and trigger requests
+	 */
+	useEffect(() => {
+		queryFields.forEach((field) => {
+			if (!field.request) return
+
+			const deps = field.params || {}
+			const currentDepValues: any = {}
+
+			Object.keys(deps).forEach((depKey) => {
+				const val = queryForm[depKey]?.value
+				currentDepValues[depKey] = val
+			})
+
+			loadOptions(field, currentDepValues)
+		})
+	}, [queryFields, queryForm, loadOptions])
+
+	/**
+	 * Internal submit implementation
 	 */
 	const performSubmit = useCallback(
 		(qForm: QueryForm, sForm: SortForm) => {
 			const filteredQuery: QueryForm = {}
 
 			Object.entries(qForm).forEach(([key, fieldValue]) => {
-				const field = queryFields.find((f) => f.key === key)
+				const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
 
-				// Helper to check if a field has valid content (logic inlined or reused)
 				const isValid = (() => {
 					const { value, condition } = fieldValue
-					if (!field) {
-						if (value === undefined || value === null || value === "") return false
-						if (Array.isArray(value)) return value.length > 0
-						return true
-					}
+					if (!field) return value !== undefined && value !== null && value !== ""
+
 					if (condition === "null" || condition === "notNull") return true
 					if (value === undefined || value === null || value === "") return false
-					if (field.type === "textarea" && typeof value === "string") {
-						const lines = value
-							.split("\n")
-							.map((line) => line.trim())
-							.filter((line) => line !== "")
-						return lines.length > 0
+					if (field.valueType === "textarea" && typeof value === "string") {
+						return value.trim().length > 0
 					}
 					if (Array.isArray(value)) {
 						if (condition === "between") {
@@ -127,30 +202,9 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 				})()
 
 				if (isValid) {
-					const fieldType = fieldValue.type || field?.type
-					if (fieldValue.condition === "null" || fieldValue.condition === "notNull") {
-						filteredQuery[key] = {
-							condition: fieldValue.condition,
-							value: undefined,
-							type: fieldType,
-						}
-					} else {
-						if (field?.type === "textarea" && typeof fieldValue.value === "string") {
-							const lines = fieldValue.value
-								.split("\n")
-								.map((line) => line.trim())
-								.filter((line) => line !== "")
-							filteredQuery[key] = {
-								...fieldValue,
-								value: lines,
-								type: fieldType,
-							}
-						} else {
-							filteredQuery[key] = {
-								...fieldValue,
-								type: fieldType,
-							}
-						}
+					filteredQuery[key] = {
+						...fieldValue,
+						type: fieldValue.type || (field?.valueType as string) || "text",
 					}
 				}
 			})
@@ -163,80 +217,46 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		[queryFields, onSubmit],
 	)
 
-	// Helper to check if a field has valid content (for context value)
 	const isFieldValueValid = useCallback(
 		(fieldKey: string, fieldValue: FieldValue) => {
-			const field = queryFields.find((f) => f.key === fieldKey)
+			const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === fieldKey)
 			const { value, condition } = fieldValue
 
-			if (!field) {
-				if (value === undefined || value === null || value === "") return false
-				if (Array.isArray(value)) return value.length > 0
-				return true
-			}
+			if (!field) return value !== undefined && value !== null && value !== ""
 			if (condition === "null" || condition === "notNull") return true
 			if (value === undefined || value === null || value === "") return false
-			if (field.type === "textarea" && typeof value === "string") {
-				const lines = value
-					.split("\n")
-					.map((line) => line.trim())
-					.filter((line) => line !== "")
-				return lines.length > 0
-			}
-			if (Array.isArray(value)) {
-				if (condition === "between") {
-					return (
-						value.length === 2 &&
-						value[0] !== undefined &&
-						value[0] !== null &&
-						value[0] !== "" &&
-						value[1] !== undefined &&
-						value[1] !== null &&
-						value[1] !== ""
-					)
-				}
-				return value.some((v) => v !== undefined && v !== null && v !== "")
-			}
+			if (Array.isArray(value)) return value.length > 0
 			return true
 		},
 		[queryFields],
 	)
 
-	// Submit search
-	const submit = useCallback(() => {
-		performSubmit(queryForm, sortForm)
-	}, [performSubmit, queryForm, sortForm])
+	const submit = useCallback(() => performSubmit(queryForm, sortForm), [performSubmit, queryForm, sortForm])
 
-	// Add sort field
 	const addSort = useCallback(
-		(key: string) => {
+		(key: string, order?: SortOrder) => {
 			setSortForm((prev) => {
 				if (prev.find((s) => s.key === key)) return prev
-				const field = sortFields.find((f) => f.key === key)
-				const defaultOrder = field?.direction || "asc"
+				const field = sortFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
+				const defaultOrder = order || (field?.defaultSortOrder === "descend" ? "desc" : "asc")
 				return [...prev, { key, order: defaultOrder }]
 			})
 		},
 		[sortFields],
 	)
 
-	// Remove sort field
 	const removeSort = useCallback((key: string) => {
 		setSortForm((prev) => prev.filter((s) => s.key !== key))
-		setSubmittedSortForm((prev) => prev.filter((s) => s.key !== key))
 	}, [])
 
-	// Update sort field
 	const updateSort = useCallback((key: string, order: SortOrder) => {
 		setSortForm((prev) => prev.map((s) => (s.key === key ? { ...s, order } : s)))
 	}, [])
 
-	// Reorder sort field
 	const reorderSort = useCallback((oldIndex: number, newIndex: number) => {
 		setSortForm((prev) => arrayMove(prev, oldIndex, newIndex))
 	}, [])
 
-	// Toggle sort field
 	const toggleSort = useCallback(
 		(key: string) => {
 			setSortForm((prev) => {
@@ -244,108 +264,54 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 				if (existing) {
 					return prev.map((s) => (s.key === key ? { ...s, order: s.order === "asc" ? "desc" : "asc" } : s))
 				}
-				const field = sortFields.find((f) => f.key === key)
-				return [...prev, { key, order: field?.direction || "asc" }]
+				const field = sortFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
+				return [...prev, { key, order: field?.defaultSortOrder === "descend" ? "desc" : "asc" }]
 			})
 		},
 		[sortFields],
 	)
 
-	// Get field value
-	const getFieldValue = useCallback(
-		(key: string): FieldValue | undefined => {
-			return queryForm[key]
-		},
-		[queryForm],
-	)
+	const getFieldValue = useCallback((key: string) => queryForm[key], [queryForm])
 
-	// Update field value
 	const updateFieldValue = useCallback(
-		(key: string, valueOrFieldValue: any, condition?: SearchCondition, type?: string) => {
+		(key: string, value: any, condition?: SearchCondition, type?: string) => {
 			setQueryForm((prev) => {
-				let newValue: FieldValue
-				if (condition !== undefined) {
-					newValue = { value: valueOrFieldValue, condition, type }
-				} else if (
-					valueOrFieldValue &&
-					typeof valueOrFieldValue === "object" &&
-					"value" in valueOrFieldValue &&
-					"condition" in valueOrFieldValue
-				) {
-					newValue = { ...valueOrFieldValue }
-					if (type) newValue.type = type
-				} else {
-					newValue = { value: valueOrFieldValue, condition: "equal", type }
+				const existing = prev[key] || {}
+				const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
+				const newValue = {
+					value: condition !== undefined ? value : (value?.value ?? value),
+					condition: condition ?? value?.condition ?? existing.condition ?? "equal",
+					type: type ?? existing.type ?? (field?.valueType as string) ?? "text",
 				}
-
-				if (!newValue.type) {
-					const field = queryFields.find((f) => f.key === key)
-					if (field) newValue.type = field.type
-				}
-
-				return {
-					...prev,
-					[key]: newValue,
-				}
+				return { ...prev, [key]: newValue }
 			})
 		},
 		[queryFields],
 	)
 
-	// Reset field value
 	const resetFieldValue = useCallback(
 		(key: string) => {
-			const field = queryFields.find((f) => f.key === key)
+			const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
 			if (field) {
 				const resetValue: FieldValue = {
-					value: field.defaultValue ?? (field.type === "number" ? undefined : ""),
-					condition: field.defaultCondition ?? "equal",
-					type: field.type,
+					value: field.initialValue ?? (field.valueType === "digit" ? undefined : ""),
+					condition: field.fieldProps?.defaultCondition ?? "equal",
+					type: (field.valueType as string) || "text",
 				}
-
-				setQueryForm((prev) => {
-					const nextForm = { ...prev, [key]: resetValue }
-					if (autoQuery) {
-						performSubmit(nextForm, sortForm)
-					}
-					return nextForm
-				})
-
-				setSubmittedQueryForm((prev) => {
-					const newForm = { ...prev }
-					delete newForm[key]
-					const hasAnyFields = Object.keys(newForm).length > 0
-					if (!hasAnyFields) setHasSubmitted(false)
-					return newForm
-				})
+				setQueryForm((prev) => ({ ...prev, [key]: resetValue }))
 			}
 		},
-		[queryFields, autoQuery, performSubmit, sortForm],
+		[queryFields],
 	)
 
-	// Reset all fields
 	const resetAll = useCallback(() => {
-		const form: QueryForm = {}
-		queryFields.forEach((field) => {
-			form[field.key] = {
-				value: field.defaultValue ?? (field.type === "number" ? undefined : ""),
-				condition: field.defaultCondition ?? "equal",
-				type: field.type,
-			}
-		})
-		setQueryForm(form)
-		setSortForm([])
+		setQueryForm(initialForm)
+		setSortForm(initialSortForm)
 		setHasSubmitted(false)
-		setSubmittedQueryForm({})
-		setSubmittedSortForm([])
+		if (autoQuery) performSubmit(initialForm, initialSortForm)
+	}, [initialForm, initialSortForm, autoQuery, performSubmit])
 
-		if (autoQuery) {
-			performSubmit(form, [])
-		}
-	}, [queryFields, autoQuery, performSubmit])
-
-	// Context value
-	const contextValue = useMemo<SearchContextValue>(
+	const contextValue = useMemo(
 		() => ({
 			queryForm,
 			getFieldValue,
@@ -355,6 +321,8 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 			submit,
 			queryFields,
 			sortFields,
+			fieldOptions,
+			columns,
 			disableConditions,
 			autoQuery,
 			isFieldValueValid,
@@ -377,6 +345,8 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 			submit,
 			queryFields,
 			sortFields,
+			fieldOptions,
+			columns,
 			disableConditions,
 			autoQuery,
 			isFieldValueValid,

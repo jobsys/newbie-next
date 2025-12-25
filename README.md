@@ -1,6 +1,6 @@
 # jobsys-newbie-next
 
-AI-friendly React components built with Ant Design 6.1 and Pro Components.
+AI-friendly React components built with Ant Design 5.x and Pro Components.
 
 ## Features
 
@@ -25,13 +25,11 @@ import { NewbieProvider } from 'jobsys-newbie-next'
 function App() {
   return (
     <NewbieProvider
+      themeMode="system"
+      primaryColor="blue"
+      density="normal"
       config={{
         locale: 'zh_CN',
-        defaults: {
-          NewbieForm: {
-            layout: 'vertical',
-          },
-        },
       }}
     >
       <YourApp />
@@ -44,19 +42,20 @@ function App() {
 
 ```tsx
 import { NewbieSearch } from 'jobsys-newbie-next'
-import type { SearchFieldConfig } from 'jobsys-newbie-next'
+import type { NewbieProColumn } from 'jobsys-newbie-next'
 
 function SearchExample() {
-  const fields: SearchFieldConfig[] = [
-    { key: 'name', type: 'input', title: '姓名' },
-    { key: 'age', type: 'number', title: '年龄' },
+  const columns: NewbieProColumn[] = [
+    { title: '姓名', dataIndex: 'name', valueType: 'text' },
+    { title: '年龄', dataIndex: 'age', valueType: 'digit', sorter: true },
   ]
 
   return (
     <NewbieSearch
-      fields={fields}
-      onSubmit={(query) => {
+      columns={columns}
+      onSubmit={(query, sort) => {
         console.log('Search query:', query)
+        console.log('Sort config:', sort)
       }}
     />
   )
@@ -71,21 +70,21 @@ Global configuration provider that supports default props override for all compo
 
 **Features:**
 
-- Global configuration management
+- Global configuration management (Theme, Color, Density)
 - Component-level default props override
 - Deep merge configuration
 - Ant Design locale support
+- Automatic Ant Design Token translation
 
 **Example:**
 
 ```tsx
 <NewbieProvider
+  themeMode="dark"
+  primaryColor="#00ff00"
+  density="compact"
   config={{
     locale: 'zh_CN',
-    defaults: {
-      NewbieForm: { layout: 'vertical' },
-      ProFormText: { placeholder: '请输入' },
-    },
   }}
 >
   <App />
@@ -109,39 +108,34 @@ Advanced search component with condition filtering, sorting, and persistence.
 
 | Property | Description | Type | Default |
 | --- | --- | --- | --- |
-| `queryFields` | Search field configurations | `SearchFieldConfig[]` | `[]` |
-| `sortFields` | Sort field configurations | `SortFieldConfig[]` | `[]` |
+| `columns` | Search/Table field configurations | `NewbieProColumn[]` | `[]` |
 | `onSubmit` | Submit callback | `(query: QueryForm, sort: SortForm) => void` | - |
 | `autoQuery` | Whether to trigger search automatically on change | `boolean` | `false` |
 | `disableConditions` | Global toggle to disable condition selectors | `boolean` | `false` |
-| `persistence` | Persistence key or boolean to enable storage | `boolean \| string` | `false` |
 
-**SearchFieldConfig:**
+**NewbieProColumn:**
+
+Inherits from `ProColumns` with additional properties:
 
 | Property | Description | Type |
 | --- | --- | --- |
-| `key` | Unique field identifier | `string` |
-| `type` | Field type | `'input'\|'number'\|'date'\|'select'\|'cascade'\|'textarea'` |
 | `title`| Field label | `string` |
-| `render` | Custom render function for the popup panel | `(props: { updateFieldValue, getFieldValue, close }) => ReactNode` |
-| `getDisplayValue` | Custom display value logic for the mask | `(getFieldValue) => string` |
-| `expandable` | Show options as tiled tags (for select) | `boolean \| 'single' \| 'multiple'` |
+| `dataIndex` | Unique field identifier | `string` |
+| `valueType` | Field type | `'text'\|'digit'\|'date'\|'dateTime'\|'select'\|'cascader'\|'textarea'` |
+| `sorter` | Enable sorting for this field | `boolean` |
+| `fieldProps` | Additional props passed to the input component | `any` |
 
 **Example:**
 
 ```tsx
 <NewbieSearch
-  queryFields={[
-    { key: 'name', type: 'input', title: '姓名' },
+  columns={[
+    { title: '姓名', dataIndex: 'name', valueType: 'text' },
     { 
-      key: 'score', 
-      type: 'number', 
-      title: '分数',
-      render: ({ updateFieldValue }) => (
-        <Button onClick={() => updateFieldValue('score', 100, 'equal', 'number')}>
-          Set 100
-        </Button>
-      )
+      title: '分数', 
+      dataIndex: 'score', 
+      valueType: 'digit', 
+      sorter: true 
     },
   ]}
   onSubmit={(query, sort) => {

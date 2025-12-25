@@ -7,14 +7,18 @@
 import React, { useState } from "react"
 import { NewbieProvider } from "../../src/components/provider"
 import { SearchDemo } from "./demos/search-demo"
-import { Layout, Menu, Typography, Card, theme } from "antd"
-import { Search } from "lucide-react"
+import { TableDemo } from "./demos/table-demo"
+import { Layout, Menu, Typography, Card, theme, Space, Segmented } from "antd"
+import { Search, Table } from "lucide-react"
 
 const { Header, Sider, Content } = Layout
 const { Title } = Typography
 
 export function App() {
 	const [currentDemo, setCurrentDemo] = useState("search")
+	const [themeMode, setThemeMode] = useState<"light" | "dark">("light")
+	const [density, setDensity] = useState<"loose" | "normal" | "compact">("normal")
+
 	const {
 		token: { colorBgContainer, borderRadiusLG },
 	} = theme.useToken()
@@ -25,12 +29,19 @@ export function App() {
 			icon: <Search size={16} />,
 			label: "NewbieSearch",
 		},
+		{
+			key: "table",
+			icon: <Table size={16} />,
+			label: "ProTable + Search",
+		},
 	]
 
 	const renderDemo = () => {
 		switch (currentDemo) {
 			case "search":
 				return <SearchDemo />
+			case "table":
+				return <TableDemo />
 			default:
 				return <div>Select a demo</div>
 		}
@@ -38,6 +49,8 @@ export function App() {
 
 	return (
 		<NewbieProvider
+			themeMode={themeMode}
+			density={density}
 			config={{
 				locale: "zh_CN",
 				defaults: {
@@ -48,7 +61,16 @@ export function App() {
 			}}
 		>
 			<Layout style={{ minHeight: "100vh" }}>
-				<Header style={{ display: "flex", alignItems: "center", background: "#fff", borderBottom: "1px solid #f0f0f0", padding: "0 24px" }}>
+				<Header
+					style={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "space-between",
+						background: themeMode === "light" ? "#fff" : "#001529",
+						borderBottom: "1px solid #f0f0f0",
+						padding: "0 24px",
+					}}
+				>
 					<div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
 						<div
 							style={{
@@ -65,10 +87,30 @@ export function App() {
 						>
 							N
 						</div>
-						<Title level={4} style={{ margin: 0 }}>
+						<Title level={4} style={{ margin: 0, color: themeMode === "light" ? "inherit" : "#fff" }}>
 							Newbie Next Playground
 						</Title>
 					</div>
+
+					<Space size="middle">
+						<Segmented
+							options={[
+								{ label: "Light", value: "light" },
+								{ label: "Dark", value: "dark" },
+							]}
+							value={themeMode}
+							onChange={(v) => setThemeMode(v as any)}
+						/>
+						<Segmented
+							options={[
+								{ label: "宽松", value: "loose" },
+								{ label: "正常", value: "normal" },
+								{ label: "紧凑", value: "compact" },
+							]}
+							value={density}
+							onChange={(v) => setDensity(v as any)}
+						/>
+					</Space>
 				</Header>
 				<Layout>
 					<Sider width={200} style={{ background: colorBgContainer }}>

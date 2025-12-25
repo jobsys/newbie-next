@@ -15,7 +15,8 @@ export type { NewbieProviderProps, NewbieProviderConfig, NewbieContextValue, Com
 // Search
 export { NewbieSearch, SearchProvider, useSearchContext } from "./components/search"
 export type {
-	SearchFieldConfig,
+	NewbieProColumn as SearchFieldConfig,
+	NewbieProColumn,
 	QueryForm,
 	FieldValue,
 	Condition,

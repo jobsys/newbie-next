@@ -5,7 +5,7 @@
  */
 
 import { createContext, useContext } from "react"
-import type { SearchFieldConfig, QueryForm, FieldValue, SortForm, SortOrder, SortFieldConfig, SearchCondition } from "../types"
+import type { QueryForm, FieldValue, SortForm, SortOrder, SearchCondition, NewbieProColumn } from "../types"
 
 /**
  * Search context value
@@ -23,10 +23,14 @@ export interface SearchContextValue {
 	resetAll: () => void
 	/** Submit search */
 	submit: () => void
-	/** Search field configurations */
-	queryFields: SearchFieldConfig[]
-	/** Sort field configurations */
-	sortFields: SortFieldConfig[]
+	/** Search field configurations (internal) */
+	queryFields: any[]
+	/** Sort field configurations (internal) */
+	sortFields: any[]
+	/** Dynamic field options */
+	fieldOptions: Record<string, any[]>
+	/** Original columns */
+	columns: NewbieProColumn<any, any>[]
 	/** Whether to disable condition selection for all fields */
 	disableConditions: boolean
 	/** Whether to auto query on change */

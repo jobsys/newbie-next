@@ -1,39 +1,19 @@
 /**
  * NewbieProvider Component
  *
- * Provides global configuration and default props override for all components
- *
- * @example
- * ```tsx
- * <NewbieProvider
- *   config={{
- *     locale: 'zh_CN',
- *     defaults: {
- *       NewbieForm: {
- *         layout: 'vertical',
- *         labelCol: { span: 6 }
- *       },
- *       ProFormText: {
- *         placeholder: '请输入'
- *       }
- *     }
- *   }}
- * >
- *   <App />
- * </NewbieProvider>
- * ```
+ * Provides global configuration and default props override for all components.
+ * Acts as a UI adapter to handle themes, colors, and density across different antd versions.
  */
 
 import { createContext, useContext, useMemo } from "react"
-import { ConfigProvider } from "antd"
+import { ConfigProvider, theme as antdTheme, App as AntApp } from "antd"
+import { StyleProvider } from "@ant-design/cssinjs"
 import zhCN from "antd/locale/zh_CN"
 import type { NewbieProviderProps, NewbieProviderConfig, NewbieContextValue } from "./types"
 import { deepMerge } from "../../utils/merge"
 
 /**
  * NewbieContext
- *
- * Provides access to global configuration and default props
  */
 const NewbieContext = createContext<NewbieContextValue | null>(null)
 
@@ -42,22 +22,13 @@ const NewbieContext = createContext<NewbieContextValue | null>(null)
  */
 const defaultConfig: NewbieProviderConfig = {
 	locale: "zh_CN",
+	themeMode: "light",
+	density: "normal",
 	defaults: {},
 }
 
 /**
  * Hook to access NewbieContext
- *
- * @returns NewbieContext value
- * @throws Error if used outside NewbieProvider
- *
- * @example
- * ```tsx
- * const { config, getDefaultProps, mergeProps } = useNewbieContext()
- *
- * const defaultProps = getDefaultProps('NewbieForm')
- * const mergedProps = mergeProps('NewbieForm', { layout: 'horizontal' })
- * ```
  */
 export function useNewbieContext(): NewbieContextValue {
 	const context = useContext(NewbieContext)
@@ -69,34 +40,18 @@ export function useNewbieContext(): NewbieContextValue {
 
 /**
  * NewbieProvider Component
- *
- * Provides global configuration and default props override for all components.
- * Wraps the application with Ant Design ConfigProvider and custom context.
- *
- * @param props - Component props
- * @returns Provider component
- *
- * @example
- * ```tsx
- * <NewbieProvider
- *   config={{
- *     locale: 'zh_CN',
- *     defaults: {
- *       NewbieForm: {
- *         layout: 'vertical'
- *       }
- *     }
- *   }}
- * >
- *   <App />
- * </NewbieProvider>
- * ```
  */
 export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
-	const { config: userConfig = {}, children } = props
+	const { config: userConfig = {}, themeMode, primaryColor, density, children } = props
 
-	// Merge user config with default config
-	const config = useMemo<NewbieProviderConfig>(() => deepMerge(defaultConfig, userConfig), [userConfig])
+	// Merge user config with props and default config
+	const config = useMemo<NewbieProviderConfig>(() => {
+		const merged = deepMerge(defaultConfig, userConfig)
+		if (themeMode) merged.themeMode = themeMode
+		if (primaryColor) merged.primaryColor = primaryColor
+		if (density) merged.density = density
+		return merged
+	}, [userConfig, themeMode, primaryColor, density])
 
 	// Get default props for a component
 	const getDefaultProps = useMemo(
@@ -127,18 +82,67 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 		[config, getDefaultProps, mergeProps],
 	)
 
-	// Get Ant Design locale
-	const antdLocale = useMemo(() => {
-		if (config.locale === "zh_CN") {
-			return zhCN
+	// Build Ant Design Theme
+	const antdThemeConfig = useMemo(() => {
+		const isDark = config.themeMode === "dark"
+		const theme = {
+			algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+			token: {} as Record<string, any>,
 		}
-		// Add more locales as needed
+
+		const getColor = (color?: string) => {
+			if (!color) return undefined
+			if (color.startsWith("#")) return color
+			const colorMap: Record<string, string> = {
+				blue: "#1677ff",
+				green: "#52c41a",
+				orange: "#fa8c16",
+				red: "#ff4d4f",
+				rose: "#eb2f96",
+				violet: "#722ed1",
+				yellow: "#fadb14",
+				default: "#1677ff",
+			}
+			return colorMap[color] || color
+		}
+
+		if (config.primaryColor) {
+			theme.token.colorPrimary = getColor(config.primaryColor)
+		}
+
+		// Density translation
+		if (config.density === "compact") {
+			theme.token.controlHeight = 28
+			theme.token.fontSize = 12
+			theme.token.padding = 12
+		} else if (config.density === "loose") {
+			theme.token.controlHeight = 36
+			theme.token.fontSize = 15
+			theme.token.padding = 18
+		}
+
+		return theme
+	}, [config.themeMode, config.primaryColor, config.density])
+
+	const antdLocale = useMemo(() => {
+		if (config.locale === "zh_CN") return zhCN
 		return zhCN
 	}, [config.locale])
 
+	// Calculate componentSize
+	const componentSize = useMemo(() => {
+		if (config.density === "compact") return "small"
+		if (config.density === "loose") return "large"
+		return "middle"
+	}, [config.density])
+
 	return (
-		<ConfigProvider locale={antdLocale}>
-			<NewbieContext.Provider value={contextValue}>{children}</NewbieContext.Provider>
-		</ConfigProvider>
+		<StyleProvider hashPriority="high">
+			<ConfigProvider locale={antdLocale} theme={antdThemeConfig} componentSize={componentSize}>
+				<AntApp>
+					<NewbieContext.Provider value={contextValue}>{children}</NewbieContext.Provider>
+				</AntApp>
+			</ConfigProvider>
+		</StyleProvider>
 	)
 }

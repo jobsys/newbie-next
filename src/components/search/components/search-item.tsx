@@ -33,7 +33,7 @@ import {
 } from "lucide-react"
 import { useSearchField } from "../hooks/use-search-field"
 import { useSearchContext } from "../context/search-context"
-import type { SearchFieldConfig, SearchCondition } from "../types"
+import type { NewbieProColumn, SearchCondition } from "../types"
 import type { MenuProps } from "antd"
 
 const { RangePicker } = DatePicker
@@ -81,7 +81,7 @@ function getConditionIcon(condition: SearchCondition) {
  */
 export interface SearchItemProps {
 	/** Field configuration */
-	field: SearchFieldConfig
+	field: NewbieProColumn
 }
 
 /**
@@ -92,11 +92,17 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	const fieldState = useSearchField({ field })
 	const {
 		getFieldValue: getFieldValueDirect,
-		updateFieldValue: updateFieldValueDirect,
+		updateFieldValue,
 		disableConditions: globalDisableConditions,
 		autoQuery,
 		submit,
+		fieldOptions,
 	} = useSearchContext()
+
+	const fieldKey = (field.dataIndex as string) || (field.key as string)
+	const valueType = (field.valueType as string) || "text"
+	const currentOptions = fieldOptions[fieldKey] || []
+
 	const [isOpen, setIsOpen] = useState(false)
 	const [selectOpen, setSelectOpen] = useState(false)
 	const [datePickerOpen, setDatePickerOpen] = useState(false)
@@ -112,16 +118,16 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	useEffect(() => {
 		if (isOpen) {
 			const timer = setTimeout(() => {
-				if (field.type === "select") {
+				if (valueType === "select") {
 					setSelectOpen(true)
 					if (selectRef.current) selectRef.current.focus()
-				} else if (field.type === "cascade") {
+				} else if (valueType === "cascader") {
 					setCascaderOpen(true)
 					if (cascaderRef.current) cascaderRef.current.focus()
-				} else if (field.type === "date") {
+				} else if (valueType === "date" || valueType === "dateTime") {
 					setDatePickerOpen(true)
 					if (inputRef.current?.focus) inputRef.current.focus()
-				} else if ((field.type === "input" || field.type === "textarea" || field.type === "number") && inputRef.current) {
+				} else if ((valueType === "text" || valueType === "textarea" || valueType === "digit" || valueType === "money") && inputRef.current) {
 					if (inputRef.current.focus) inputRef.current.focus()
 					else if (inputRef.current.input) inputRef.current.input.focus()
 				}
@@ -132,43 +138,58 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 			setDatePickerOpen(false)
 			setCascaderOpen(false)
 		}
-	}, [isOpen, field.type, fieldState.condition])
+	}, [isOpen, valueType, fieldState.condition])
 
 	const currentConditionLabel =
 		fieldState.conditions.find((c) => c.value === fieldState.condition)?.label || fieldState.conditions[0]?.label || "等于"
 
 	const getMaskDisplayValue = () => {
-		if (field.getDisplayValue) return field.getDisplayValue(getFieldValueDirect)
+		if (field.fieldProps?.getDisplayValue) return field.fieldProps.getDisplayValue(getFieldValueDirect)
 		if (!fieldState.isValid || fieldState.displayValue === "") return ""
 
-		if (field.type === "cascade" && Array.isArray(fieldState.value) && fieldState.value.length > 0 && field.options) {
+		if (valueType === "cascader" && Array.isArray(fieldState.value) && fieldState.value.length > 0) {
 			const findLabels = (options: any[], path: any[]): string[] => {
 				if (path.length === 0) return []
 				const currentValue = path[0]
 				const option = options.find((opt: any) => opt.value === currentValue)
-				if (!option) return fieldState.displayValue ? [fieldState.displayValue] : path.map(String)
+				if (!option) return [String(currentValue)]
 				const label = option.label || option.text || String(option.value)
 				if (path.length === 1) return [label]
 				if (option.children) return [label, ...findLabels(option.children, path.slice(1))]
 				return [label, ...path.slice(1).map(String)]
 			}
-			const labels = findLabels(field.options, fieldState.value)
+			const labels = findLabels(currentOptions, fieldState.value)
 			return labels.join(" / ")
 		}
 
 		let displayText = fieldState.displayValue
-		if (field.type === "select" && fieldState.value && field.options) {
-			if (Array.isArray(fieldState.value)) {
-				const labels = fieldState.value
-					.map((val: any) => {
-						const option = field.options?.find((opt: any) => opt.value === val)
-						return option?.label || option?.text || String(val)
-					})
-					.filter(Boolean)
-				displayText = labels.join(", ")
-			} else {
-				const selectedOption = field.options.find((opt: any) => opt.value === fieldState.value)
-				if (selectedOption) displayText = selectedOption.label || selectedOption.text || String(selectedOption.value)
+		if (valueType === "select" && fieldState.value) {
+			if (field.valueEnum) {
+				if (Array.isArray(fieldState.value)) {
+					const labels = fieldState.value
+						.map((val: any) => {
+							const config = (field.valueEnum as any)?.[val]
+							return typeof config === "object" ? config.text : String(config || val)
+						})
+						.filter(Boolean)
+					displayText = labels.join(", ")
+				} else {
+					const config = (field.valueEnum as any)[fieldState.value]
+					displayText = typeof config === "object" ? config.text : String(config || fieldState.value)
+				}
+			} else if (currentOptions.length > 0) {
+				if (Array.isArray(fieldState.value)) {
+					const labels = fieldState.value
+						.map((val: any) => {
+							const option = currentOptions.find((opt: any) => opt.value === val)
+							return option?.label || option?.text || String(val)
+						})
+						.filter(Boolean)
+					displayText = labels.join(", ")
+				} else {
+					const selectedOption = currentOptions.find((opt: any) => opt.value === fieldState.value)
+					if (selectedOption) displayText = selectedOption.label || selectedOption.text || String(selectedOption.value)
+				}
 			}
 		}
 		return displayText
@@ -177,16 +198,16 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	const maskDisplayValue = getMaskDisplayValue()
 
 	const conditionPart = useMemo(() => {
-		if (field.render) return null
+		if (field.renderFormItem) return null
 		if (!fieldState.isValid || fieldState.displayValue === "") return null
 		if (fieldState.condition === "equal") return null
 		return currentConditionLabel
-	}, [fieldState.isValid, fieldState.displayValue, fieldState.condition, currentConditionLabel, field.render])
+	}, [fieldState.isValid, fieldState.displayValue, fieldState.condition, currentConditionLabel, field.renderFormItem])
 
 	const getPopupContainer = () => panelRef.current || document.body
 
 	const renderConditionSelector = () => {
-		if (field.disableConditions || globalDisableConditions || field.render) return null
+		if (field.fieldProps?.disableConditions || globalDisableConditions || field.renderFormItem) return null
 		const menuItems: MenuProps["items"] = fieldState.conditions.map((condition) => ({
 			key: condition.value,
 			label: (
@@ -221,15 +242,17 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	}
 
 	const renderInput = () => {
-		if (field.render) return null
+		if (field.renderFormItem) return null
 		const commonProps = {
 			placeholder: `搜索 ${field.title}`,
 			disabled: fieldState.disabled,
 			style: { flex: 1, minWidth: 0 },
+			...field.fieldProps,
 		}
 
-		switch (field.type) {
-			case "input":
+		switch (valueType) {
+			case "text":
+			case "password":
 				return (
 					<Input
 						{...commonProps}
@@ -239,7 +262,8 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						allowClear
 					/>
 				)
-			case "number":
+			case "digit":
+			case "money":
 				if (fieldState.condition === "between") {
 					const rangeValue = Array.isArray(fieldState.value)
 						? fieldState.value
@@ -290,7 +314,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 								: fieldState.value
 						}
 						onChange={(value) => fieldState.setValue(value)}
-						options={field.options || []}
+						options={currentOptions}
 						allowClear
 						showSearch
 						mode={isMultiple ? "multiple" : undefined}
@@ -312,14 +336,14 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						rows={4}
 					/>
 				)
-			case "cascade":
+			case "cascader":
 				return (
 					<Cascader
 						{...commonProps}
 						ref={cascaderRef}
 						value={Array.isArray(fieldState.value) ? fieldState.value : fieldState.value ? [fieldState.value] : []}
 						onChange={(value) => fieldState.setValue(value)}
-						options={field.options || []}
+						options={currentOptions}
 						allowClear
 						showSearch
 						style={{ width: "100%", flex: 1 }}
@@ -331,6 +355,9 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 					/>
 				)
 			case "date":
+			case "dateTime":
+			case "dateRange":
+			case "dateTimeRange":
 				const toDayjs = (value: any): Dayjs | null => {
 					if (!value) return null
 					try {
@@ -340,7 +367,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						return null
 					}
 				}
-				if (fieldState.condition === "between") {
+				if (fieldState.condition === "between" || valueType.includes("Range")) {
 					const rangeValue: [Dayjs | null, Dayjs | null] =
 						Array.isArray(fieldState.value) && fieldState.value.length === 2
 							? [toDayjs(fieldState.value[0]), toDayjs(fieldState.value[1])]
@@ -362,6 +389,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 							open={datePickerOpen}
 							onOpenChange={setDatePickerOpen}
 							autoFocus
+							showTime={valueType.includes("Time")}
 						/>
 					)
 				}
@@ -377,6 +405,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						open={datePickerOpen}
 						onOpenChange={setDatePickerOpen}
 						autoFocus
+						showTime={valueType === "dateTime"}
 					/>
 				)
 			default:
@@ -385,15 +414,11 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	}
 
 	const renderPanelContent = () => {
-		const close = () => setIsOpen(false)
 		return (
 			<div ref={panelRef} style={{ minWidth: "300px", padding: "8px" }}>
-				{field.render ? (
-					field.render({
-						getFieldValue: (key: string) => getFieldValueDirect(key),
-						updateFieldValue: updateFieldValueDirect,
-						close,
-					})
+				{field.renderFormItem ? (
+					// In a real scenario, we might want to support this, but per user request, we focus on standard
+					<div style={{ padding: 8, color: "#999" }}>[Custom Render Not Yet Re-implemented]</div>
 				) : (
 					<>
 						<div
@@ -409,10 +434,10 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 							<div style={{ fontSize: "13px", color: "#000000d9", fontWeight: 500 }}>
 								搜索{" "}
 								<span style={{ fontFamily: "monospace", background: "#f5f5f5", padding: "1px 3px", borderRadius: "3px" }}>
-									{field.title}
+									{field.title as React.ReactNode}
 								</span>
 							</div>
-							{!field.disableConditions && !globalDisableConditions && renderConditionSelector()}
+							{!field.fieldProps?.disableConditions && !globalDisableConditions && renderConditionSelector()}
 						</div>
 						<div>{renderInput()}</div>
 					</>
@@ -476,8 +501,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	}
 
 	const renderTiledSelect = () => {
-		const isMultiple = field.expandable === "multiple"
-		const options = field.options || []
+		const isMultiple = field.fieldProps?.expandable === "multiple"
 		const currentValue = fieldState.value
 		const handleSelect = (val: any) => {
 			if (isMultiple) {
@@ -485,23 +509,22 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				const index = newValue.indexOf(val)
 				if (index > -1) newValue.splice(index, 1)
 				else newValue.push(val)
-				fieldState.setValue(newValue)
-				if (fieldState.condition !== "in" && fieldState.condition !== "notIn") fieldState.setCondition("in")
+
+				const newCondition = fieldState.condition === "in" || fieldState.condition === "notIn" ? fieldState.condition : "in"
+
+				updateFieldValue(fieldKey, newValue, newCondition, valueType)
 			} else {
 				const newValue = currentValue === val ? undefined : val
-				fieldState.setValue(newValue)
-				if (fieldState.condition !== "equal" && fieldState.condition !== "notEqual") fieldState.setCondition("equal")
+				const newCondition = fieldState.condition === "equal" || fieldState.condition === "notEqual" ? fieldState.condition : "equal"
+
+				updateFieldValue(fieldKey, newValue, newCondition, valueType)
 			}
 
-			// For tiled select, trigger auto query immediately as there is no popover to close
-			if (autoQuery) {
-				// Use a small timeout to ensure state is updated
-				setTimeout(() => submit(), 0)
-			}
+			if (autoQuery) setTimeout(() => submit(), 0)
 		}
 		return (
 			<div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
-				{options.map((opt: any) => (
+				{currentOptions.map((opt: any) => (
 					<Tag.CheckableTag
 						key={opt.value}
 						checked={isMultiple ? Array.isArray(currentValue) && currentValue.includes(opt.value) : currentValue === opt.value}
@@ -514,15 +537,15 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 		)
 	}
 
-	if (field.type === "select" && field.expandable) {
+	if (valueType === "select" && field.fieldProps?.expandable) {
 		return (
 			<div style={{ display: "flex", padding: "8px 0", borderBottom: "1px dashed #f0f0f0", width: "100%" }}>
 				<div style={{ width: "80px", flexShrink: 0, color: "#333", fontSize: "13px", fontWeight: 400, paddingTop: "2px" }}>
-					{field.title}:
+					{field.title as React.ReactNode}:
 				</div>
 				<div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
 					<div>{renderTiledSelect()}</div>
-					{field.expandable === "multiple" && (
+					{field.fieldProps?.expandable === "multiple" && (
 						<div style={{ fontSize: "12px", color: "#999", marginLeft: "12px", whiteSpace: "nowrap", paddingTop: "2px" }}>(可多选)</div>
 					)}
 				</div>
@@ -532,17 +555,14 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 
 	return (
 		<div style={{ marginBottom: "8px" }}>
-			<div style={{ marginBottom: "4px", fontSize: "13px", color: "#333", fontWeight: 400 }}>{field.title}</div>
+			<div style={{ marginBottom: "4px", fontSize: "13px", color: "#333", fontWeight: 400 }}>{field.title as React.ReactNode}</div>
 			<Popover
 				content={renderPanelContent()}
 				trigger="click"
 				open={isOpen}
 				onOpenChange={(open) => {
 					setIsOpen(open)
-					// Trigger auto query only when popover closes
-					if (!open && autoQuery) {
-						submit()
-					}
+					if (!open && autoQuery) submit()
 				}}
 				placement="bottomLeft"
 				overlayStyle={{ padding: 0 }}

@@ -4,7 +4,7 @@
 
 import React, { useState } from "react"
 import { NewbieSearch } from "../../../src/components/search"
-import type { SearchFieldConfig, SortFieldConfig, QueryForm, SortForm } from "../../../src/components/search"
+import type { NewbieProColumn, QueryForm, SortForm } from "../../../src/components/search"
 import { Card, Typography, Space, Divider, Button, InputNumber } from "antd"
 
 const { Title, Paragraph, Text, Link } = Typography
@@ -12,181 +12,120 @@ const { Title, Paragraph, Text, Link } = Typography
 export function SearchDemo() {
 	const [searchResult, setSearchResult] = useState<{ query: QueryForm; sort: SortForm } | null>(null)
 
-	const queryFields: SearchFieldConfig[] = [
-		{ key: "name", type: "input", title: "姓名" },
-		{ key: "age", type: "number", title: "年龄" },
+	const columns: NewbieProColumn[] = [
 		{
-			key: "category",
-			type: "select",
+			title: "姓名",
+			dataIndex: "name",
+			valueType: "text",
+		},
+		{
+			title: "年龄",
+			dataIndex: "age",
+			valueType: "digit",
+			sorter: true,
+		},
+		{
 			title: "类别选择",
-			expandable: "multiple",
-			options: [
-				{ label: "数码", value: "digital" },
-				{ label: "家电", value: "appliance" },
-				{ label: "食品", value: "food" },
-				{ label: "衣服", value: "clothing" },
-				{ label: "图书", value: "books" },
-			],
+			dataIndex: "category",
+			valueType: "select",
+			fieldProps: {
+				expandable: "multiple",
+			},
+			valueEnum: {
+				digital: { text: "数码" },
+				appliance: { text: "家电" },
+				food: { text: "食品" },
+				clothing: { text: "衣服" },
+				books: { text: "图书" },
+			},
 		},
 		{
-			key: "status",
-			type: "select",
 			title: "状态",
-			expandable: "single",
-			options: [
-				{ label: "在读", value: "studying" },
-				{ label: "毕业", value: "graduated" },
-				{ label: "休学", value: "suspended" },
-				{ label: "退学", value: "dropped" },
-			],
+			dataIndex: "status",
+			valueType: "select",
+			fieldProps: {
+				expandable: "single",
+			},
+			valueEnum: {
+				studying: { text: "在读" },
+				graduated: { text: "毕业" },
+				suspended: { text: "休学" },
+				dropped: { text: "退学" },
+			},
 		},
 		{
-			key: "tags",
-			type: "textarea",
 			title: "标签",
+			dataIndex: "tags",
+			valueType: "textarea",
 		},
 		{
-			key: "region",
-			type: "cascade",
 			title: "地区",
-			options: [
-				{
-					value: "zhejiang",
-					label: "浙江",
-					children: [
-						{
-							value: "hangzhou",
-							label: "杭州",
-							children: [
-								{ value: "xihu", label: "西湖" },
-								{ value: "xiasha", label: "下沙" },
-							],
-						},
-						{
-							value: "ningbo",
-							label: "宁波",
-							children: [
-								{ value: "jiangbei", label: "江北" },
-								{ value: "haishu", label: "海曙" },
-							],
-						},
-					],
-				},
-				{
-					value: "jiangsu",
-					label: "江苏",
-					children: [
-						{
-							value: "nanjing",
-							label: "南京",
-							children: [
-								{ value: "xuanwu", label: "玄武" },
-								{ value: "qinhuai", label: "秦淮" },
-							],
-						},
-						{
-							value: "suzhou",
-							label: "苏州",
-							children: [
-								{ value: "gusu", label: "姑苏" },
-								{ value: "wuzhong", label: "吴中" },
-							],
-						},
-					],
-				},
-			],
+			dataIndex: "region",
+			valueType: "cascader",
+			fieldProps: {
+				options: [
+					{
+						value: "zhejiang",
+						label: "浙江",
+						children: [
+							{
+								value: "hangzhou",
+								label: "杭州",
+								children: [
+									{ value: "xihu", label: "西湖" },
+									{ value: "xiasha", label: "下沙" },
+								],
+							},
+							{
+								value: "ningbo",
+								label: "宁波",
+								children: [
+									{ value: "jiangbei", label: "江北" },
+									{ value: "haishu", label: "海曙" },
+								],
+							},
+						],
+					},
+					{
+						value: "jiangsu",
+						label: "江苏",
+						children: [
+							{
+								value: "nanjing",
+								label: "南京",
+								children: [
+									{ value: "xuanwu", label: "玄武" },
+									{ value: "qinhuai", label: "秦淮" },
+								],
+							},
+							{
+								value: "suzhou",
+								label: "苏州",
+								children: [
+									{ value: "gusu", label: "姑苏" },
+									{ value: "wuzhong", label: "吴中" },
+								],
+							},
+						],
+					},
+				],
+			},
 		},
 		{
-			key: "birth_day",
-			type: "date",
 			title: "出生日期",
+			dataIndex: "birth_day",
+			valueType: "date",
+			sorter: true,
+			defaultSortOrder: "descend",
 		},
 		{
-			key: "custom_score",
-			type: "number",
-			title: "自定义分数",
-			render: ({ updateFieldValue, getFieldValue }) => {
-				const current = getFieldValue("custom_score")
-				return (
-					<div style={{ padding: "8px 0" }}>
-						<Space wrap>
-							{[10, 20, 50, 100].map((score) => (
-								<Button
-									key={score}
-									size="small"
-									type={current?.value === score ? "primary" : "default"}
-									onClick={() => updateFieldValue("custom_score", score, "equal", "number")}
-								>
-									{score}分
-								</Button>
-							))}
-							<Button size="small" danger onClick={() => updateFieldValue("custom_score", undefined, "equal", "number")}>
-								清除
-							</Button>
-						</Space>
-					</div>
-				)
-			},
-			getDisplayValue: (getFieldValue) => {
-				const val = getFieldValue("custom_score")
-				return val?.value ? `${val.value} 分` : ""
-			},
+			title: "创建时间",
+			dataIndex: "created_at",
+			valueType: "dateTime",
+			sorter: true,
+			defaultSortOrder: "descend",
+			hideInSearch: true,
 		},
-		{
-			key: "price_range",
-			type: "number",
-			title: "价格范围",
-			render: ({ updateFieldValue, getFieldValue }) => {
-				const min = getFieldValue("min_price")?.value
-				const max = getFieldValue("max_price")?.value
-				return (
-					<div style={{ padding: "8px 0" }}>
-						<Space>
-							<InputNumber
-								placeholder="最低价"
-								value={min}
-								onChange={(val) => updateFieldValue("min_price", val ?? undefined, "greaterThanOrEqual", "number")}
-								style={{ width: 100 }}
-							/>
-							<span style={{ color: "#999" }}>-</span>
-							<InputNumber
-								placeholder="最高价"
-								value={max}
-								onChange={(val) => updateFieldValue("max_price", val ?? undefined, "lessThanOrEqual", "number")}
-								style={{ width: 100 }}
-							/>
-						</Space>
-						<div style={{ marginTop: 8 }}>
-							<Button
-								size="small"
-								type="link"
-								onClick={() => {
-									updateFieldValue("min_price", undefined)
-									updateFieldValue("max_price", undefined)
-								}}
-								style={{ padding: 0 }}
-							>
-								清空价格
-							</Button>
-						</div>
-					</div>
-				)
-			},
-			getDisplayValue: (getFieldValue) => {
-				const min = getFieldValue("min_price")?.value
-				const max = getFieldValue("max_price")?.value
-				if (min !== undefined && max !== undefined) return `${min} - ${max}`
-				if (min !== undefined) return `≥ ${min}`
-				if (max !== undefined) return `≤ ${max}`
-				return ""
-			},
-		},
-	]
-
-	const sortFields: SortFieldConfig[] = [
-		{ key: "age", title: "年龄" },
-		{ key: "birth_day", title: "出生日期", direction: "desc" },
-		{ key: "created_at", title: "创建时间", direction: "desc" },
 	]
 
 	return (
@@ -226,8 +165,7 @@ export function SearchDemo() {
 			<Divider />
 
 			<NewbieSearch
-				queryFields={queryFields}
-				sortFields={sortFields}
+				columns={columns}
 				autoQuery={false}
 				onSubmit={(query, sort) => {
 					setSearchResult({ query, sort })
@@ -293,21 +231,12 @@ export function SearchDemo() {
 					<tbody>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>queryFields</Text>
+								<Text code>columns</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">SearchFieldConfig[]</Text>
+								<Text type="secondary">NewbieProColumn[]</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>搜索字段配置（必填）</td>
-						</tr>
-						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
-							<td style={{ padding: "12px 8px" }}>
-								<Text code>sortFields</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">SortFieldConfig[]</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>排序字段配置</td>
+							<td style={{ padding: "12px 8px" }}>表格列配置（Ant Design ProTable 风格）。包含搜索字段和排序规则的统一配置。</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
@@ -329,27 +258,20 @@ export function SearchDemo() {
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>persistence</Text>
+								<Text code>disableConditions</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">boolean | string</Text>
+								<Text type="secondary">boolean</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>是否开启搜索历史持久化。若为字符串，则作为 localStorage 的 key</td>
-						</tr>
-						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
-							<td style={{ padding: "12px 8px" }}>
-								<Text code>gutter</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">number | string</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>字段组件之间的间距</td>
+							<td style={{ padding: "12px 8px" }}>是否在全局禁用条件选择</td>
 						</tr>
 					</tbody>
 				</table>
 
-				<Title level={3}>SearchFieldConfig (字段配置)</Title>
-				<Paragraph>定义单个搜索项的行为和展现形式。每个字段配置都包含字段类型、显示名称、可选条件等属性。</Paragraph>
+				<Title level={3}>NewbieProColumn (列配置)</Title>
+				<Paragraph>
+					继承自 ProTable 的 <Text code>ProColumns</Text>，扩展了 NewbieSearch 特有的配置。主要用于定义字段类型、显示名称、排序行为等。
+				</Paragraph>
 				<table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 24 }}>
 					<thead>
 						<tr style={{ borderBottom: "1px solid #f0f0f0", textAlign: "left" }}>
@@ -362,125 +284,88 @@ export function SearchDemo() {
 					<tbody>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>key</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">string</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>✓</td>
-							<td style={{ padding: "12px 8px" }}>字段唯一标识，用于在 QueryForm 中作为键名</td>
-						</tr>
-						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
-							<td style={{ padding: "12px 8px" }}>
-								<Text code>type</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">'input' | 'number' | 'date' | 'select' | 'cascade' | 'textarea'</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>✓</td>
-							<td style={{ padding: "12px 8px" }}>字段类型，决定使用哪种输入组件和默认条件</td>
-						</tr>
-						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
-							<td style={{ padding: "12px 8px" }}>
 								<Text code>title</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">string</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>✓</td>
-							<td style={{ padding: "12px 8px" }}>字段显示的名称，会显示在搜索项标签和筛选标签中</td>
+							<td style={{ padding: "12px 8px" }}>字段选择器显示的名称</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>conditions</Text>
+								<Text code>dataIndex / key</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">SearchCondition[]</Text>
+								<Text type="secondary">string | string[]</Text>
+							</td>
+							<td style={{ padding: "12px 8px" }}>✓</td>
+							<td style={{ padding: "12px 8px" }}>字段的唯一标识，在 QueryForm 中作为键名</td>
+						</tr>
+						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
+							<td style={{ padding: "12px 8px" }}>
+								<Text code>valueType</Text>
+							</td>
+							<td style={{ padding: "12px 8px" }}>
+								<Text type="secondary">'text' | 'digit' | 'select' | 'date' | 'dateTime' | 'cascader' | 'textarea'</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>自定义可用的条件列表，不设置则使用该字段类型的默认条件</td>
+							<td style={{ padding: "12px 8px" }}>字段类型，决定输入组件和默认筛选条件</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>defaultValue</Text>
+								<Text code>valueEnum</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">any</Text>
+								<Text type="secondary">Object</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>字段的默认值</td>
+							<td style={{ padding: "12px 8px" }}>枚举配置，用于 select 类型自动生成选项</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>defaultCondition</Text>
+								<Text code>fieldProps</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">SearchCondition</Text>
+								<Text type="secondary">Object</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>字段的默认条件</td>
+							<td style={{ padding: "12px 8px" }}>
+								组件原始属性，在此处可配置 NewbieSearch 特有项：
+								<br />- <Text code>expandable</Text>: select 平铺显示
+								<br />- <Text code>conditions</Text>: 自定义可用条件
+								<br />- <Text code>disableConditions</Text>: 禁用条件选择
+							</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>disableConditions</Text>
+								<Text code>sorter</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">boolean</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>是否禁用条件选择，禁用后只能使用默认条件</td>
+							<td style={{ padding: "12px 8px" }}>是否开启该字段的排序功能</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>expandable</Text>
+								<Text code>defaultSortOrder</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">boolean | 'single' | 'multiple'</Text>
+								<Text type="secondary">'ascend' | 'descend'</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>
-								仅对 select 类型有效。设置为 true 或 'multiple' 时选项会平铺展示，支持多选；'single' 时平铺展示但仅单选
-							</td>
+							<td style={{ padding: "12px 8px" }}>默认排序方向</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
-								<Text code>options</Text>
+								<Text code>request / params</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">{"Array<{label: string, value: any}>"}</Text>
+								<Text type="secondary">Function / Object</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>select 和 cascade 类型必需。选项列表，cascade 类型支持嵌套的 children 结构</td>
-						</tr>
-						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
-							<td style={{ padding: "12px 8px" }}>
-								<Text code>order</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">number</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>字段排序权重，数值越大越靠前显示。未设置时按配置数组顺序显示</td>
-						</tr>
-						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
-							<td style={{ padding: "12px 8px" }}>
-								<Text code>render</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">{"(props) => ReactNode"}</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>自定义渲染函数，完全自定义弹层中的内容。详见下方"进阶用法"章节</td>
-						</tr>
-						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
-							<td style={{ padding: "12px 8px" }}>
-								<Text code>getDisplayValue</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">{"(getFieldValue) => string"}</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>自定义显示值函数，用于自定义搜索项标签中显示的文字。通常与 render 配合使用</td>
+							<td style={{ padding: "12px 8px" }}>配合 valueType="select" 实现远程数据加载和级联搜索</td>
 						</tr>
 					</tbody>
 				</table>
