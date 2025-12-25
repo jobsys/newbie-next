@@ -175,7 +175,22 @@ function SearchFields(): JSX.Element {
 	// Get active search conditions from submitted query form snapshot
 	const activeConditions = queryFields
 		.map((field) => {
+			// Use submitted snapshot to determine display value
+			const getSubmittedFieldValue = (key: string) => submittedQueryForm[key]
 			const fieldValue = submittedQueryForm[field.key]
+			const customDisplay = field.getDisplayValue ? field.getDisplayValue(getSubmittedFieldValue) : null
+
+			// For fields with custom render, check if they have a custom display value in the submitted snapshot
+			if (field.render) {
+				if (!customDisplay) return null
+				return {
+					key: field.key,
+					label: `${field.title}: ${customDisplay}`,
+					field,
+					type: "filter",
+				}
+			}
+
 			if (!fieldValue) return null
 
 			// For null/notNull conditions, they are always valid regardless of value
@@ -197,7 +212,9 @@ function SearchFields(): JSX.Element {
 
 			// Format value display
 			let valueDisplay = ""
-			if (field.type === "select" && field.options) {
+			if (field.getDisplayValue) {
+				valueDisplay = customDisplay || ""
+			} else if (field.type === "select" && field.options) {
 				// For select, show label instead of value
 				if (Array.isArray(fieldValue.value)) {
 					const labels = fieldValue.value

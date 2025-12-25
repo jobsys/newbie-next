@@ -30,7 +30,12 @@ export interface SearchProviderProps {
 // ... (keeping existing comments if possible, but replace_file_content replaces block)
  */
 export function SearchProvider(props: SearchProviderProps): JSX.Element {
-	const { queryFields, sortFields = [], onSubmit, initialQueryForm = {}, children } = props
+	const { queryFields: rawQueryFields, sortFields = [], onSubmit, initialQueryForm = {}, children } = props
+
+	// Sort query fields by order (larger number comes first)
+	const queryFields = useMemo(() => {
+		return [...rawQueryFields].sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
+	}, [rawQueryFields])
 
 	// ... (keep initialForm memo)
 	const initialForm = useMemo<QueryForm>(() => {
@@ -120,11 +125,27 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	)
 
 	// Update field value
-	const updateFieldValue = useCallback((key: string, value: FieldValue) => {
-		setQueryForm((prev) => ({
-			...prev,
-			[key]: value,
-		}))
+	const updateFieldValue = useCallback((key: string, valueOrFieldValue: any, condition?: string) => {
+		setQueryForm((prev) => {
+			let newValue: FieldValue
+			if (condition !== undefined) {
+				newValue = { value: valueOrFieldValue, condition }
+			} else if (
+				valueOrFieldValue &&
+				typeof valueOrFieldValue === "object" &&
+				"value" in valueOrFieldValue &&
+				"condition" in valueOrFieldValue
+			) {
+				newValue = valueOrFieldValue
+			} else {
+				newValue = { value: valueOrFieldValue, condition: "equal" }
+			}
+
+			return {
+				...prev,
+				[key]: newValue,
+			}
+		})
 	}, [])
 
 	// Reset field value
@@ -175,9 +196,16 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	const isFieldValueValid = useCallback(
 		(fieldKey: string, fieldValue: FieldValue) => {
 			const field = queryFields.find((f) => f.key === fieldKey)
-			if (!field) return false
 
 			const { value, condition } = fieldValue
+
+			if (!field) {
+				// If not in queryFields, it's likely a custom data field from a render function
+				// Use a simple non-empty check
+				if (value === undefined || value === null || value === "") return false
+				if (Array.isArray(value)) return value.length > 0
+				return true
+			}
 
 			// Special conditions are always valid
 			if (condition === "null" || condition === "notNull") {
@@ -226,6 +254,10 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		const queryItems: QueryItem[] = []
 
 		Object.entries(queryForm).forEach(([key, fieldValue]) => {
+			// Check if this key belongs to a field with a custom render
+			const field = queryFields.find((f) => f.key === key)
+			if (field?.render) return // Skip virtual/container fields
+
 			if (isFieldValueValid(key, fieldValue)) {
 				// For null/notNull conditions, ensure value is undefined
 				if (fieldValue.condition === "null" || fieldValue.condition === "notNull") {
@@ -237,7 +269,6 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 					queryItems.push({ key, ...val })
 				} else {
 					// For textarea fields, convert multi-line text to array (one item per line)
-					const field = queryFields.find((f) => f.key === key)
 					if (field?.type === "textarea" && typeof fieldValue.value === "string") {
 						const lines = fieldValue.value
 							.split("\n")

@@ -113,6 +113,19 @@ export interface SearchFieldConfig {
 	disableConditions?: boolean
 	/** Whether to show options as tiled (for type: 'select') */
 	expandable?: boolean | "single" | "multiple"
+	/** Search field order (larger number comes first) */
+	order?: number
+	/** Custom render function for popup panel */
+	render?: (props: {
+		/** Get value of any field */
+		getFieldValue: (key: string) => any
+		/** Update value and condition of any field */
+		updateFieldValue: (key: string, value: any, condition?: string) => void
+		/** Close the popup panel */
+		close: () => void
+	}) => any
+	/** Custom display value for mask */
+	getDisplayValue?: (getFieldValue: (key: string) => any) => string
 	/** Additional field-specific props */
 	[key: string]: any
 }

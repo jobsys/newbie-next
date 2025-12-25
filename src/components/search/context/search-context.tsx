@@ -16,7 +16,7 @@ export interface SearchContextValue {
 	/** Get field value */
 	getFieldValue: (key: string) => FieldValue | undefined
 	/** Update field value */
-	updateFieldValue: (key: string, value: FieldValue) => void
+	updateFieldValue: (key: string, value: any, condition?: string) => void
 	/** Reset field value */
 	resetFieldValue: (key: string) => void
 	/** Reset all fields */

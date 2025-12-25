@@ -32,6 +32,7 @@ import {
 	Search,
 } from "lucide-react"
 import { useSearchField } from "../hooks/use-search-field"
+import { useSearchContext } from "../context/search-context"
 import type { SearchFieldConfig } from "../types"
 import type { MenuProps } from "antd"
 
@@ -83,27 +84,11 @@ export interface SearchItemProps {
 
 /**
  * SearchItem Component
- *
- * Renders a single search field with condition selector and input
- * Layout: [Label] [Condition Button] [Input Field]
- *
- * @param props - Component props
- * @returns Search item component
- *
- * @example
- * ```tsx
- * <SearchItem
- *   field={{
- *     key: 'name',
- *     type: 'input',
- *     title: '姓名'
- *   }}
- * />
- * ```
  */
 export function SearchItem(props: SearchItemProps): JSX.Element {
 	const { field } = props
 	const fieldState = useSearchField({ field })
+	const { getFieldValue: getFieldValueDirect, updateFieldValue: updateFieldValueDirect } = useSearchContext()
 	const [isOpen, setIsOpen] = useState(false)
 	const [selectOpen, setSelectOpen] = useState(false)
 	const [datePickerOpen, setDatePickerOpen] = useState(false)
@@ -118,73 +103,45 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	// Auto focus input and open nested popups when panel opens
 	useEffect(() => {
 		if (isOpen) {
-			// Small delay to ensure DOM is ready and animation started
-			// 200ms is safer for Popover transition completion
 			const timer = setTimeout(() => {
 				if (field.type === "select") {
-					// Open select dropdown and focus
 					setSelectOpen(true)
-					if (selectRef.current) {
-						selectRef.current.focus()
-					}
+					if (selectRef.current) selectRef.current.focus()
 				} else if (field.type === "cascade") {
-					// Open cascader dropdown
 					setCascaderOpen(true)
-					if (cascaderRef.current) {
-						cascaderRef.current.focus()
-					}
+					if (cascaderRef.current) cascaderRef.current.focus()
 				} else if (field.type === "date") {
-					// Open date picker and focus
-					// For date fields, we also handle condition changes (e.g. to 'between')
 					setDatePickerOpen(true)
-					if (inputRef.current?.focus) {
-						inputRef.current.focus()
-					}
+					if (inputRef.current?.focus) inputRef.current.focus()
 				} else if ((field.type === "input" || field.type === "textarea" || field.type === "number") && inputRef.current) {
-					if (inputRef.current.focus) {
-						inputRef.current.focus()
-					} else if (inputRef.current.input) {
-						inputRef.current.input.focus()
-					}
+					if (inputRef.current.focus) inputRef.current.focus()
+					else if (inputRef.current.input) inputRef.current.input.focus()
 				}
 			}, 200)
-
 			return () => clearTimeout(timer)
 		} else {
-			// Reset nested open states when main panel closes
 			setSelectOpen(false)
 			setDatePickerOpen(false)
 			setCascaderOpen(false)
 		}
 	}, [isOpen, field.type, fieldState.condition])
 
-	// Get current condition label
 	const currentConditionLabel =
 		fieldState.conditions.find((c) => c.value === fieldState.condition)?.label || fieldState.conditions[0]?.label || "等于"
 
-	// Get mask display value
 	const getMaskDisplayValue = () => {
-		if (!fieldState.isValid || fieldState.displayValue === "") {
-			return ""
-		}
+		if (field.getDisplayValue) return field.getDisplayValue(getFieldValueDirect)
+		if (!fieldState.isValid || fieldState.displayValue === "") return ""
 
-		// For cascade, always find labels from options (don't rely on displayValue)
 		if (field.type === "cascade" && Array.isArray(fieldState.value) && fieldState.value.length > 0 && field.options) {
 			const findLabels = (options: any[], path: any[]): string[] => {
 				if (path.length === 0) return []
 				const currentValue = path[0]
 				const option = options.find((opt: any) => opt.value === currentValue)
-				if (!option) {
-					// If option not found, try to use displayValue or fallback to value
-					return fieldState.displayValue ? [fieldState.displayValue] : path.map(String)
-				}
+				if (!option) return fieldState.displayValue ? [fieldState.displayValue] : path.map(String)
 				const label = option.label || option.text || String(option.value)
-				if (path.length === 1) {
-					return [label]
-				}
-				if (option.children) {
-					return [label, ...findLabels(option.children, path.slice(1))]
-				}
+				if (path.length === 1) return [label]
+				if (option.children) return [label, ...findLabels(option.children, path.slice(1))]
 				return [label, ...path.slice(1).map(String)]
 			}
 			const labels = findLabels(field.options, fieldState.value)
@@ -203,9 +160,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				displayText = labels.join(", ")
 			} else {
 				const selectedOption = field.options.find((opt: any) => opt.value === fieldState.value)
-				if (selectedOption) {
-					displayText = selectedOption.label || selectedOption.text || String(selectedOption.value)
-				}
+				if (selectedOption) displayText = selectedOption.label || selectedOption.text || String(selectedOption.value)
 			}
 		}
 		return displayText
@@ -213,29 +168,17 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 
 	const maskDisplayValue = getMaskDisplayValue()
 
-	// Get condition part for addonBefore
 	const conditionPart = useMemo(() => {
-		if (!fieldState.isValid || fieldState.displayValue === "") {
-			return null
-		}
-		if (fieldState.condition === "equal") {
-			return null
-		}
-		if (fieldState.condition === "null" || fieldState.condition === "notNull") {
-			return currentConditionLabel
-		}
+		if (field.render) return null
+		if (!fieldState.isValid || fieldState.displayValue === "") return null
+		if (fieldState.condition === "equal") return null
 		return currentConditionLabel
-	}, [fieldState.isValid, fieldState.displayValue, fieldState.condition, currentConditionLabel])
+	}, [fieldState.isValid, fieldState.displayValue, fieldState.condition, currentConditionLabel, field.render])
 
-	// Helper to get popup container
 	const getPopupContainer = () => panelRef.current || document.body
 
-	// Render condition selector as dropdown button
 	const renderConditionSelector = () => {
-		if (field.disableConditions) {
-			return null
-		}
-
+		if (field.disableConditions || field.render) return null
 		const menuItems: MenuProps["items"] = fieldState.conditions.map((condition) => ({
 			key: condition.value,
 			label: (
@@ -244,12 +187,8 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 					{condition.label}
 				</span>
 			),
-			onClick: ({ key }: { key: string }) => {
-				fieldState.setCondition(key)
-			},
+			onClick: ({ key }: { key: string }) => fieldState.setCondition(key),
 		}))
-
-		const currentIcon = getConditionIcon(fieldState.condition)
 
 		return (
 			<div onClick={(e) => e.stopPropagation()}>
@@ -264,7 +203,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 							height: "32px",
 						}}
 					>
-						<span style={{ color: "#1890ff", display: "flex", alignItems: "center" }}>{currentIcon}</span>
+						<span style={{ color: "#1890ff", display: "flex", alignItems: "center" }}>{getConditionIcon(fieldState.condition)}</span>
 						<span style={{ display: "flex", alignItems: "center" }}>{currentConditionLabel}</span>
 						<ChevronDown size={12} strokeWidth={2} style={{ display: "flex", alignItems: "center", marginLeft: "4px" }} />
 					</Button>
@@ -273,8 +212,8 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 		)
 	}
 
-	// Render input based on field type
 	const renderInput = () => {
+		if (field.render) return null
 		const commonProps = {
 			placeholder: `搜索 ${field.title}`,
 			disabled: fieldState.disabled,
@@ -292,40 +231,32 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						allowClear
 					/>
 				)
-
 			case "number":
-				// Render range input for "between" condition
 				if (fieldState.condition === "between") {
 					const rangeValue = Array.isArray(fieldState.value)
 						? fieldState.value
 						: fieldState.value
 							? [fieldState.value, fieldState.value]
 							: [undefined, undefined]
-
 					return (
 						<div style={{ display: "flex", gap: "8px", flex: 1, alignItems: "center" }}>
 							<InputNumber
 								ref={inputRef}
 								placeholder="最小值"
 								value={rangeValue[0]}
-								onChange={(value) => {
-									fieldState.setValue([value ?? undefined, rangeValue[1]])
-								}}
+								onChange={(value) => fieldState.setValue([value ?? undefined, rangeValue[1]])}
 								style={{ flex: 1 }}
 							/>
 							<span style={{ color: "#999" }}>~</span>
 							<InputNumber
 								placeholder="最大值"
 								value={rangeValue[1]}
-								onChange={(value) => {
-									fieldState.setValue([rangeValue[0], value ?? undefined])
-								}}
+								onChange={(value) => fieldState.setValue([rangeValue[0], value ?? undefined])}
 								style={{ flex: 1 }}
 							/>
 						</div>
 					)
 				}
-
 				return (
 					<InputNumber
 						{...commonProps}
@@ -335,31 +266,26 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						style={{ width: "100%", flex: 1 }}
 					/>
 				)
-
 			case "select":
-				// Check if condition requires multiple selection
 				const isMultiple = fieldState.condition === "in" || fieldState.condition === "notIn"
-				const selectValue = isMultiple
-					? Array.isArray(fieldState.value)
-						? fieldState.value
-						: fieldState.value
-							? [fieldState.value]
-							: []
-					: fieldState.value
-
 				return (
 					<Select
 						{...commonProps}
 						ref={selectRef}
-						value={selectValue}
-						onChange={(value) => {
-							fieldState.setValue(value)
-						}}
+						value={
+							isMultiple
+								? Array.isArray(fieldState.value)
+									? fieldState.value
+									: fieldState.value
+										? [fieldState.value]
+										: []
+								: fieldState.value
+						}
+						onChange={(value) => fieldState.setValue(value)}
 						options={field.options || []}
 						allowClear
 						showSearch
 						mode={isMultiple ? "multiple" : undefined}
-						placeholder={`搜索 ${field.title}`}
 						style={{ width: "100%", flex: 1 }}
 						getPopupContainer={getPopupContainer}
 						open={selectOpen}
@@ -367,7 +293,6 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						autoFocus
 					/>
 				)
-
 			case "textarea":
 				return (
 					<Input.TextArea
@@ -377,26 +302,18 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						onChange={(e) => fieldState.setValue(e.target.value)}
 						placeholder={`搜索 ${field.title}, 每行一个`}
 						rows={4}
-						style={{ flex: 1, minWidth: 0 }}
 					/>
 				)
-
 			case "cascade":
-				// Cascader value should be an array representing the path
-				const cascaderValue = Array.isArray(fieldState.value) ? fieldState.value : fieldState.value ? [fieldState.value] : []
-
 				return (
 					<Cascader
 						{...commonProps}
 						ref={cascaderRef}
-						value={cascaderValue}
-						onChange={(value) => {
-							fieldState.setValue(value)
-						}}
+						value={Array.isArray(fieldState.value) ? fieldState.value : fieldState.value ? [fieldState.value] : []}
+						onChange={(value) => fieldState.setValue(value)}
 						options={field.options || []}
 						allowClear
 						showSearch
-						placeholder={`搜索 ${field.title}`}
 						style={{ width: "100%", flex: 1 }}
 						getPopupContainer={getPopupContainer}
 						open={cascaderOpen}
@@ -405,104 +322,30 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						displayRender={(labels) => labels.join(" / ")}
 					/>
 				)
-
 			case "date":
-				// Helper function to safely convert value to dayjs
-				// Always create a fresh dayjs instance to avoid reference issues
 				const toDayjs = (value: any): Dayjs | null => {
 					if (!value) return null
-
 					try {
-						// Always create a new dayjs instance from the value
-						// This ensures we have a proper dayjs object with all methods
-						let d: Dayjs | null = null
-
-						if (typeof value === "string") {
-							// String date - parse with format if it matches YYYY-MM-DD
-							if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-								d = dayjs(value, "YYYY-MM-DD", true)
-							} else {
-								d = dayjs(value)
-							}
-						} else if (value instanceof Date) {
-							// Native Date object
-							d = dayjs(value)
-						} else if (typeof value === "number") {
-							// Timestamp
-							d = dayjs(value)
-						} else if (value && typeof value === "object") {
-							// Could be dayjs object or plain object
-							// Always create a new instance from it
-							if (typeof value.format === "function" && typeof value.isValid === "function") {
-								// It's a dayjs-like object, create new instance from it
-								try {
-									if (typeof value.toDate === "function") {
-										d = dayjs(value.toDate())
-									} else {
-										d = dayjs(value)
-									}
-								} catch {
-									d = dayjs(value)
-								}
-							} else {
-								d = dayjs(value)
-							}
-						} else {
-							d = dayjs(value)
-						}
-
-						// Validate the result
-						if (d && typeof d.isValid === "function" && d.isValid()) {
-							try {
-								const dateValue = d.toDate ? d.toDate() : new Date(d.valueOf())
-								const freshDayjs = dayjs(dateValue)
-								if (freshDayjs.isValid()) {
-									return freshDayjs
-								}
-							} catch {
-								return d
-							}
-							return d
-						}
-					} catch (e) {
-						console.warn("Error converting value to dayjs:", e, value)
+						const d = dayjs(value)
+						return d.isValid() ? d : null
+					} catch {
+						return null
 					}
-
-					return null
 				}
-
-				// Use useMemo to stabilize date values
-				const dateValue = useMemo(() => {
-					return toDayjs(fieldState.value)
-				}, [fieldState.value])
-
-				const rangeValue = useMemo((): [Dayjs | null, Dayjs | null] => {
-					if (fieldState.condition === "between") {
-						if (Array.isArray(fieldState.value) && fieldState.value.length === 2) {
-							return [toDayjs(fieldState.value[0]), toDayjs(fieldState.value[1])]
-						} else if (fieldState.value) {
-							const date = toDayjs(fieldState.value)
-							if (date) {
-								return [date, date]
-							}
-						}
-					}
-					return [null, null]
-				}, [fieldState.value, fieldState.condition])
-
-				// Render range picker for "between" condition
 				if (fieldState.condition === "between") {
+					const rangeValue: [Dayjs | null, Dayjs | null] =
+						Array.isArray(fieldState.value) && fieldState.value.length === 2
+							? [toDayjs(fieldState.value[0]), toDayjs(fieldState.value[1])]
+							: [null, null]
 					return (
 						<RangePicker
-							{...commonProps}
 							ref={inputRef}
+							disabled={fieldState.disabled}
 							value={rangeValue}
-							onChange={(dates: [Dayjs | null, Dayjs | null] | null) => {
+							onChange={(dates) => {
 								if (dates && dates[0] && dates[1]) {
 									fieldState.setValue([dates[0].format("YYYY-MM-DD"), dates[1].format("YYYY-MM-DD")])
-								} else {
-									fieldState.setValue(null)
-								}
+								} else fieldState.setValue(null)
 							}}
 							style={{ width: "100%", flex: 1 }}
 							format="YYYY-MM-DD"
@@ -514,75 +357,65 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						/>
 					)
 				}
-
-				// Single date picker
 				return (
 					<DatePicker
 						{...commonProps}
 						ref={inputRef}
-						value={dateValue}
-						onChange={(date: Dayjs | null) => {
-							fieldState.setValue(date ? date.format("YYYY-MM-DD") : null)
-						}}
+						value={toDayjs(fieldState.value)}
+						onChange={(date) => fieldState.setValue(date ? date.format("YYYY-MM-DD") : null)}
 						style={{ width: "100%", flex: 1 }}
 						format="YYYY-MM-DD"
-						placeholder={`选择${field.title}`}
 						getPopupContainer={getPopupContainer}
 						open={datePickerOpen}
 						onOpenChange={setDatePickerOpen}
 						autoFocus
 					/>
 				)
-
 			default:
 				return <Input {...commonProps} value={fieldState.value || ""} onChange={(e) => fieldState.setValue(e.target.value)} allowClear />
 		}
 	}
 
-	// Render popup panel content
 	const renderPanelContent = () => {
+		const close = () => setIsOpen(false)
 		return (
 			<div ref={panelRef} style={{ minWidth: "300px", padding: "8px" }}>
-				{/* Title and condition selector in one row */}
-				<div
-					style={{
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "space-between",
-						marginBottom: "8px",
-						paddingBottom: "8px",
-						borderBottom: "1px solid #f0f0f0",
-					}}
-				>
-					<div style={{ fontSize: "13px", color: "#000000d9", fontWeight: 500 }}>
-						搜索{" "}
-						<span
+				{field.render ? (
+					field.render({
+						getFieldValue: (key: string) => getFieldValueDirect(key),
+						updateFieldValue: updateFieldValueDirect,
+						close,
+					})
+				) : (
+					<>
+						<div
 							style={{
-								fontFamily: "monospace",
-								background: "#f5f5f5",
-								padding: "1px 3px",
-								borderRadius: "3px",
-								fontSize: "12px",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "space-between",
+								marginBottom: "8px",
+								paddingBottom: "8px",
+								borderBottom: "1px solid #f0f0f0",
 							}}
 						>
-							{field.title}
-						</span>
-					</div>
-					{!field.disableConditions && <div style={{ marginLeft: "8px" }}>{renderConditionSelector()}</div>}
-				</div>
-
-				{/* Input field */}
-				<div>{renderInput()}</div>
+							<div style={{ fontSize: "13px", color: "#000000d9", fontWeight: 500 }}>
+								搜索{" "}
+								<span style={{ fontFamily: "monospace", background: "#f5f5f5", padding: "1px 3px", borderRadius: "3px" }}>
+									{field.title}
+								</span>
+							</div>
+							{!field.disableConditions && renderConditionSelector()}
+						</div>
+						<div>{renderInput()}</div>
+					</>
+				)}
 			</div>
 		)
 	}
 
-	// Render mask (Input-style display)
 	const renderMask = () => {
-		// Render condition selector on mask
 		const renderConditionAddon = () => {
 			if (!conditionPart) return null
-
 			const menuItems: MenuProps["items"] = fieldState.conditions.map((condition) => ({
 				key: condition.value,
 				label: (
@@ -593,7 +426,6 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				),
 				onClick: ({ key }) => fieldState.setCondition(key),
 			}))
-
 			return (
 				<div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
 					<Dropdown menu={{ items: menuItems }} trigger={["click"]}>
@@ -618,9 +450,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				</div>
 			)
 		}
-
 		const conditionAddon = renderConditionAddon()
-
 		return (
 			<Space.Compact style={{ width: "100%" }}>
 				{conditionAddon}
@@ -637,72 +467,43 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 		)
 	}
 
-	// Render tiled select for expandable fields
 	const renderTiledSelect = () => {
 		const isMultiple = field.expandable === "multiple"
 		const options = field.options || []
 		const currentValue = fieldState.value
-
 		const handleSelect = (val: any) => {
 			if (isMultiple) {
 				const newValue = Array.isArray(currentValue) ? [...currentValue] : []
 				const index = newValue.indexOf(val)
-				if (index > -1) {
-					newValue.splice(index, 1)
-				} else {
-					newValue.push(val)
-				}
+				if (index > -1) newValue.splice(index, 1)
+				else newValue.push(val)
 				fieldState.setValue(newValue)
-				// Ensure condition is set to 'in' for multiple selects
-				if (fieldState.condition !== "in" && fieldState.condition !== "notIn") {
-					fieldState.setCondition("in")
-				}
+				if (fieldState.condition !== "in" && fieldState.condition !== "notIn") fieldState.setCondition("in")
 			} else {
-				// Toggle off if already selected, or select new
 				const newValue = currentValue === val ? undefined : val
 				fieldState.setValue(newValue)
-				// Ensure condition is set to 'equal' for single select
-				if (fieldState.condition !== "equal" && fieldState.condition !== "notEqual") {
-					fieldState.setCondition("equal")
-				}
+				if (fieldState.condition !== "equal" && fieldState.condition !== "notEqual") fieldState.setCondition("equal")
 			}
 		}
-
 		return (
 			<div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
-				{options.map((opt: any) => {
-					const isSelected = isMultiple ? Array.isArray(currentValue) && currentValue.includes(opt.value) : currentValue === opt.value
-
-					return (
-						<Tag.CheckableTag key={opt.value} checked={isSelected} onChange={() => handleSelect(opt.value)}>
-							{opt.label || opt.text || String(opt.value)}
-						</Tag.CheckableTag>
-					)
-				})}
+				{options.map((opt: any) => (
+					<Tag.CheckableTag
+						key={opt.value}
+						checked={isMultiple ? Array.isArray(currentValue) && currentValue.includes(opt.value) : currentValue === opt.value}
+						onChange={() => handleSelect(opt.value)}
+					>
+						{opt.label || opt.text || String(opt.value)}
+					</Tag.CheckableTag>
+				))}
 			</div>
 		)
 	}
 
 	if (field.type === "select" && field.expandable) {
 		return (
-			<div
-				style={{
-					display: "flex",
-					padding: "8px 0",
-					borderBottom: "1px dashed #f0f0f0",
-					width: "100%",
-				}}
-			>
-				<div
-					style={{
-						width: "80px",
-						flexShrink: 0,
-						color: "#333",
-						fontSize: "13px",
-						fontWeight: 400,
-						paddingTop: "2px",
-					}}
-				>
+			<div style={{ display: "flex", padding: "8px 0", borderBottom: "1px dashed #f0f0f0", width: "100%" }}>
+				<div style={{ width: "80px", flexShrink: 0, color: "#333", fontSize: "13px", fontWeight: 400, paddingTop: "2px" }}>
 					{field.title}:
 				</div>
 				<div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -717,19 +518,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 
 	return (
 		<div style={{ marginBottom: "8px" }}>
-			{/* Title on top */}
-			<div
-				style={{
-					marginBottom: "4px",
-					fontSize: "13px",
-					color: "#333",
-					fontWeight: 400,
-				}}
-			>
-				{field.title}
-			</div>
-
-			{/* Mask and Popover */}
+			<div style={{ marginBottom: "4px", fontSize: "13px", color: "#333", fontWeight: 400 }}>{field.title}</div>
 			<Popover
 				content={renderPanelContent()}
 				trigger="click"
