@@ -22,7 +22,8 @@ import { SearchProvider } from "./context/search-provider"
 import { useSearchContext } from "./context/search-context"
 import { SearchItem } from "./components/search-item"
 import { getConditionLabel } from "./utils/conditions"
-import type { NewbieSearchProps, SortField, NewbieProColumn } from "./types"
+import { NewbieSearchProps, SortField, NewbieProColumn } from "./types"
+import { NewbieIcon } from "../icon"
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core"
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
@@ -54,7 +55,7 @@ function SortableItem({ sort, field }: { sort: SortField; field: NewbieProColumn
 		<div ref={setNodeRef} style={style}>
 			<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
 				<div {...attributes} {...listeners} style={{ cursor: "grab", display: "flex", alignItems: "center", color: "#999" }}>
-					<GripVertical size={14} />
+					<NewbieIcon icon={GripVertical} />
 				</div>
 				<span style={{ fontWeight: 500 }}>{field.title as React.ReactNode}</span>
 			</div>
@@ -62,14 +63,14 @@ function SortableItem({ sort, field }: { sort: SortField; field: NewbieProColumn
 				<Button
 					size="small"
 					type={sort.order === "asc" ? "primary" : "default"}
-					icon={<SortAsc size={14} />}
+					icon={<NewbieIcon icon={SortAsc} />}
 					onClick={() => updateSort(sort.key, "asc")}
 					style={{ width: 32, padding: 0 }}
 				/>
 				<Button
 					size="small"
 					type={sort.order === "desc" ? "primary" : "default"}
-					icon={<SortDesc size={14} />}
+					icon={<NewbieIcon icon={SortDesc} />}
 					onClick={() => updateSort(sort.key, "desc")}
 					style={{ width: 32, padding: 0 }}
 				/>
@@ -78,7 +79,7 @@ function SortableItem({ sort, field }: { sort: SortField; field: NewbieProColumn
 					size="small"
 					type="text"
 					danger
-					icon={<Trash2 size={14} />}
+					icon={<NewbieIcon icon={Trash2} />}
 					onClick={() => removeSort(sort.key)}
 					style={{ width: 32, padding: 0 }}
 				/>
@@ -149,7 +150,7 @@ function SortPopoverContent(): JSX.Element {
 				value={null}
 				onChange={(val: string) => addSort(val)}
 				disabled={availableFields.length === 0}
-				suffixIcon={<Plus size={14} />}
+				suffixIcon={<NewbieIcon icon={Plus} />}
 			>
 				{availableFields.map((field) => {
 					const key = (field.dataIndex as string) || (field.key as string)
@@ -375,7 +376,7 @@ function SearchFields(): JSX.Element {
 							type="link"
 							size="small"
 							onClick={() => setExpanded(!expanded)}
-							icon={expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+							icon={expanded ? <NewbieIcon icon={ChevronUp} /> : <NewbieIcon icon={ChevronDown} />}
 							style={{ paddingLeft: 0 }}
 						>
 							{expanded ? "收起更多" : `更多筛选 (${standardFields.length - initialVisibleCount})`}
@@ -384,7 +385,7 @@ function SearchFields(): JSX.Element {
 				</div>
 
 				<Space size={16}>
-					<Button icon={<RotateCw size={14} />} onClick={resetAll} disabled={activeConditions.length === 0 && !hasSubmitted}>
+					<Button icon={<NewbieIcon icon={RotateCw} />} onClick={resetAll} disabled={activeConditions.length === 0 && !hasSubmitted}>
 						重置
 					</Button>
 					<Space>
@@ -400,7 +401,7 @@ function SearchFields(): JSX.Element {
 									}
 								}}
 							>
-								<Button icon={<ArrowUpDown size={14} />}>
+								<Button icon={<NewbieIcon icon={ArrowUpDown} />}>
 									排序
 									{sortForm.length > 0 && (
 										<Tag color="blue" bordered={false} style={{ marginLeft: 6, marginRight: 0 }}>
@@ -410,7 +411,7 @@ function SearchFields(): JSX.Element {
 								</Button>
 							</Popover>
 						)}
-						<Button type="primary" icon={<Search size={14} />} onClick={submit}>
+						<Button type="primary" icon={<NewbieIcon icon={Search} />} onClick={submit}>
 							搜索
 						</Button>
 					</Space>
@@ -460,7 +461,7 @@ function SearchFields(): JSX.Element {
 								type="link"
 								size="small"
 								danger
-								icon={<XCircle size={12} />}
+								icon={<NewbieIcon icon={XCircle} size={12} />}
 								onClick={resetAll}
 								style={{ height: "auto", padding: "0 4px", fontSize: "12px" }}
 							>

@@ -8,6 +8,10 @@
 export { NewbieProvider, useNewbieContext } from "./components/provider"
 export type { NewbieProviderProps, NewbieProviderConfig, NewbieContextValue, ComponentDefaults } from "./components/provider"
 
+// Icon
+export { NewbieIcon } from "./components/icon"
+export type { NewbieIconProps } from "./components/icon"
+
 // Form (will be implemented)
 // export { NewbieForm } from './components/form'
 // export type { NewbieFormProps } from './components/form'

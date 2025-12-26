@@ -8,8 +8,9 @@ import React, { useState } from "react"
 import { NewbieProvider } from "../../src/components/provider"
 import { SearchDemo } from "./demos/search-demo"
 import { TableDemo } from "./demos/table-demo"
+import { IconDemo } from "./demos/icon-demo"
 import { Layout, Menu, Typography, Card, theme, Space, Segmented } from "antd"
-import { Search, Table } from "lucide-react"
+import { Search, Table, Smile } from "lucide-react"
 
 const { Header, Sider, Content } = Layout
 const { Title } = Typography
@@ -34,6 +35,11 @@ export function App() {
 			icon: <Table size={16} />,
 			label: "ProTable + Search",
 		},
+		{
+			key: "icon",
+			icon: <Smile size={16} />,
+			label: "NewbieIcon",
+		},
 	]
 
 	const renderDemo = () => {
@@ -42,6 +48,8 @@ export function App() {
 				return <SearchDemo />
 			case "table":
 				return <TableDemo />
+			case "icon":
+				return <IconDemo />
 			default:
 				return <div>Select a demo</div>
 		}

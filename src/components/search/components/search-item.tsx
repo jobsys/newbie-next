@@ -33,6 +33,7 @@ import {
 } from "lucide-react"
 import { useSearchField } from "../hooks/use-search-field"
 import { useSearchContext } from "../context/search-context"
+import { NewbieIcon } from "../../icon"
 import type { NewbieProColumn, SearchCondition } from "../types"
 import type { MenuProps } from "antd"
 
@@ -44,35 +45,33 @@ const { RangePicker } = DatePicker
  * Returns a Lucide icon component with appropriate styling for Ant Design components
  */
 function getConditionIcon(condition: SearchCondition) {
-	const iconProps = { size: 14, strokeWidth: 2, style: { display: "inline-block" } }
-
 	switch (condition) {
 		case "equal":
-			return <Equal {...iconProps} />
+			return <NewbieIcon icon={Equal} />
 		case "notEqual":
-			return <EqualNot {...iconProps} />
+			return <NewbieIcon icon={EqualNot} />
 		case "include":
-			return <Grid2X2Check {...iconProps} />
+			return <NewbieIcon icon={Grid2X2Check} />
 		case "exclude":
-			return <Grid2X2X {...iconProps} />
+			return <NewbieIcon icon={Grid2X2X} />
 		case "greaterThan":
 		case "greaterThanOrEqual":
-			return <ChevronRight {...iconProps} />
+			return <NewbieIcon icon={ChevronRight} />
 		case "lessThan":
 		case "lessThanOrEqual":
-			return <ChevronLeft {...iconProps} />
+			return <NewbieIcon icon={ChevronLeft} />
 		case "between":
-			return <ChevronsLeftRightEllipsis {...iconProps} />
+			return <NewbieIcon icon={ChevronsLeftRightEllipsis} />
 		case "in":
-			return <CircleSlash {...iconProps} />
+			return <NewbieIcon icon={CircleSlash} />
 		case "notIn":
-			return <CircleOff {...iconProps} />
+			return <NewbieIcon icon={CircleOff} />
 		case "null":
-			return <Ban {...iconProps} />
+			return <NewbieIcon icon={Ban} />
 		case "notNull":
-			return <Circle {...iconProps} />
+			return <NewbieIcon icon={Circle} />
 		default:
-			return <Search {...iconProps} />
+			return <NewbieIcon icon={Search} />
 	}
 }
 
@@ -234,7 +233,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 					>
 						<span style={{ color: "#1890ff", display: "flex", alignItems: "center" }}>{getConditionIcon(fieldState.condition)}</span>
 						<span style={{ display: "flex", alignItems: "center" }}>{currentConditionLabel}</span>
-						<ChevronDown size={12} strokeWidth={2} style={{ display: "flex", alignItems: "center", marginLeft: "4px" }} />
+						<NewbieIcon icon={ChevronDown} size={12} style={{ display: "flex", alignItems: "center", marginLeft: "4px" }} />
 					</Button>
 				</Dropdown>
 			</div>
