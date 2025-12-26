@@ -4,37 +4,61 @@ import { getFieldConditions, getConditionLabel } from "../utils/conditions"
 import type { NewbieProColumn, SearchCondition } from "../types"
 
 /**
- * Hook options
+ * SearchField Hook 配置项
  */
 export interface UseSearchFieldOptions {
-	/** Field configuration */
+	/** 字段配置信息 (Field configuration) */
 	field: NewbieProColumn
 }
 
 /**
- * Hook return value
+ * SearchField Hook 返回值
  */
 export interface UseSearchFieldReturn {
-	/** Field value */
+	/** 当前字段的值 (Current field value) */
 	value: any
-	/** Current condition */
+	/** 当前选择的检索条件 (Current search condition, e.g., 'equal', 'include') */
 	condition: SearchCondition
-	/** Available conditions */
+	/** 该字段支持的所有检索条件列表 (Available conditions for this field) */
 	conditions: Array<{ value: SearchCondition; label: string }>
-	/** Update value */
+	/** 更新字段值的方法 (Method to update field value) */
 	setValue: (value: any) => void
-	/** Update condition */
+	/** 更新检索条件的方法 (Method to update search condition) */
 	setCondition: (condition: SearchCondition) => void
-	/** Display value for overlay */
+	/** 用于在界面上显示的格式化后的值 (Formatted value for display in the UI) */
 	displayValue: string
-	/** Whether the field is valid (has value or special condition) */
+	/** 该字段当前是否有效（即是否有值或属于特殊条件如“为空”） (Whether the field is valid) */
 	isValid: boolean
-	/** Whether input is disabled (e.g., null/notNull condition) */
+	/** 该字段的输入控件是否应禁用（如选择“为空”时） (Whether the input should be disabled) */
 	disabled: boolean
 }
 
 /**
- * useSearchField Hook
+ * 搜索字段状态管理 Hook (Search Field State Management Hook)
+ *
+ * 此 Hook 封装了单个搜索字段的复杂逻辑，包括：
+ * 1. 自动从 SearchContext 中获取和同步字段值与条件。
+ * 2. 处理不同 valueType（如 select, date, digit）在切换条件时的值转换逻辑。
+ * 3. 自动计算格式化的显示文本。
+ * 4. 判定字段的有效性和禁用状态。
+ *
+ * @param options - 配置项，包含字段定义
+ * @returns 包含值、条件、控制方法和状态的 UseSearchFieldReturn 对象
+ *
+ * @example
+ * ```tsx
+ * const SearchItem = ({ field }) => {
+ *   const { value, condition, setValue, setCondition, displayValue } = useSearchField({ field });
+ *
+ *   return (
+ *     <div>
+ *       <span>{field.title}: {displayValue}</span>
+ *       <Input value={value} onChange={e => setValue(e.target.value)} />
+ *       <ConditionSelect options={conditions} value={condition} onChange={setCondition} />
+ *     </div>
+ *   );
+ * };
+ * ```
  */
 export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldReturn {
 	const { field } = options

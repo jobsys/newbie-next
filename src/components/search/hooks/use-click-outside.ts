@@ -1,17 +1,30 @@
 /**
- * useClickOutside Hook
+ * 点击外部触发 Hook (Click Outside Hook)
  *
- * Detects clicks outside of a referenced element
+ * 此 Hook 用于监听并在用户点击指定元素外部时触发回调函数。
+ * 常用于关闭弹窗、下拉菜单、Popover 等交互组件。
  *
- * @param ref - React ref to the element
- * @param handler - Callback function when click outside
+ * @param ref - 需要监听的元素的 React Ref
+ * @param handler - 点击外部时执行的回调函数
  *
  * @example
  * ```tsx
- * const ref = useRef<HTMLDivElement>(null)
- * useClickOutside(ref, () => {
- *   setIsOpen(false)
- * })
+ * function Dropdown() {
+ *   const [isOpen, setIsOpen] = useState(false);
+ *   const containerRef = useRef<HTMLDivElement>(null);
+ *
+ *   // 当点击 containerRef 之外的区域时，关闭下拉菜单
+ *   useClickOutside(containerRef, () => {
+ *     if (isOpen) setIsOpen(false);
+ *   });
+ *
+ *   return (
+ *     <div ref={containerRef}>
+ *       <button onClick={() => setIsOpen(!isOpen)}>Toggle</button>
+ *       {isOpen && <ul><li>Option 1</li></ul>}
+ *     </div>
+ *   );
+ * }
  * ```
  */
 
