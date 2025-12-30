@@ -374,7 +374,7 @@ export function SearchDemo() {
 					字段类型详解
 				</Title>
 				<Paragraph>不同字段类型支持不同的输入方式和条件：</Paragraph>
-				<Card bodyStyle={{ padding: "16px" }}>
+				<Card styles={{ body: { padding: "16px" } }}>
 					<Space direction="vertical" size="middle" style={{ width: "100%" }}>
 						<div>
 							<Text strong>input (文本输入)</Text>
@@ -438,7 +438,7 @@ export function SearchDemo() {
 				<Paragraph>
 					<Text code>query</Text> 是一个对象，键为字段的 <Text code>key</Text>，值包含搜索值、条件和类型：
 				</Paragraph>
-				<Card bodyStyle={{ padding: "16px", background: "#fafafa" }}>
+				<Card styles={{ body: { padding: "16px", background: "#fafafa" } }}>
 					<pre style={{ margin: 0, fontSize: "13px" }}>
 						{`{
   [fieldKey: string]: {
@@ -470,7 +470,7 @@ export function SearchDemo() {
 				<Paragraph>
 					<Text code>sort</Text> 是一个数组，包含多个排序规则，按优先级排序：
 				</Paragraph>
-				<Card bodyStyle={{ padding: "16px", background: "#fafafa" }}>
+				<Card styles={{ body: { padding: "16px", background: "#fafafa" } }}>
 					<pre style={{ margin: 0, fontSize: "13px" }}>
 						{`Array<{
   key: string,      // 排序字段
@@ -545,7 +545,7 @@ export function SearchDemo() {
 
 				<Title level={4}>1. render 函数</Title>
 				<Paragraph>允许你渲染任意 React 节点，并提供了工具方法来更新搜索状态：</Paragraph>
-				<Card bodyStyle={{ padding: "16px", background: "#001529" }}>
+				<Card styles={{ body: { padding: "16px", background: "#001529" } }}>
 					<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 						{`render: ({ updateFieldValue, getFieldValue, close }) => {
   return (
@@ -581,7 +581,7 @@ export function SearchDemo() {
 					当你在 <Text code>render</Text> 中更新了多个字段或者使用了复杂数据结构时，可以使用 <Text code>getDisplayValue</Text>{" "}
 					来自定义搜索项标签中显示的文字。
 				</Paragraph>
-				<Card bodyStyle={{ padding: "16px", background: "#001529" }}>
+				<Card styles={{ body: { padding: "16px", background: "#001529" } }}>
 					<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 						{`getDisplayValue: (getFieldValue) => {
   const min = getFieldValue('min_price')?.value;
@@ -614,7 +614,7 @@ export function SearchDemo() {
 				<Paragraph>以下是一些常见的使用场景和代码示例：</Paragraph>
 
 				<Title level={4}>基础用法</Title>
-				<Card bodyStyle={{ padding: "16px", background: "#001529", marginBottom: 16 }}>
+				<Card styles={{ body: { padding: "16px", background: "#001529", marginBottom: 16 } }}>
 					<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 						{`import { NewbieSearch } from '@newbie/next'
 
@@ -648,7 +648,7 @@ function MyComponent() {
 				</Card>
 
 				<Title level={4}>启用搜索持久化</Title>
-				<Card bodyStyle={{ padding: "16px", background: "#001529", marginBottom: 16 }}>
+				<Card styles={{ body: { padding: "16px", background: "#001529", marginBottom: 16 } }}>
 					<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 						{`<NewbieSearch
   queryFields={queryFields}
@@ -668,7 +668,7 @@ function MyComponent() {
 				</Paragraph>
 
 				<Title level={4}>自定义字段条件</Title>
-				<Card bodyStyle={{ padding: "16px", background: "#001529", marginBottom: 16 }}>
+				<Card styles={{ body: { padding: "16px", background: "#001529", marginBottom: 16 } }}>
 					<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 						{`const queryFields = [
   {
@@ -690,7 +690,7 @@ function MyComponent() {
 				</Card>
 
 				<Title level={4}>平铺展示选项（expandable）</Title>
-				<Card bodyStyle={{ padding: "16px", background: "#001529", marginBottom: 16 }}>
+				<Card styles={{ body: { padding: "16px", background: "#001529", marginBottom: 16 } }}>
 					<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 						{`const queryFields = [
   {
@@ -730,7 +730,7 @@ function MyComponent() {
 				<Paragraph>
 					组件支持多种搜索条件，不同字段类型默认支持的条件不同。你也可以通过 <Text code>conditions</Text> 属性自定义某个字段可用的条件。
 				</Paragraph>
-				<Card bodyStyle={{ padding: "16px", marginBottom: 24 }}>
+				<Card styles={{ body: { padding: "16px", marginBottom: 24 } }}>
 					<Space direction="vertical" size="middle" style={{ width: "100%" }}>
 						<div>
 							<Text strong>文本条件：</Text>

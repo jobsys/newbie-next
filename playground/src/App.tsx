@@ -9,8 +9,9 @@ import { NewbieProvider } from "../../src/components/provider"
 import { SearchDemo } from "./demos/search-demo"
 import { TableDemo } from "./demos/table-demo"
 import { IconDemo } from "./demos/icon-demo"
+import { CaptchaDemo } from "./demos/captcha-demo"
 import { Layout, Menu, Typography, Card, theme, Space, Segmented } from "antd"
-import { Search, Table, Smile } from "lucide-react"
+import { Search, Table, Smile, ShieldCheck } from "lucide-react"
 
 const { Header, Sider, Content } = Layout
 const { Title } = Typography
@@ -40,6 +41,11 @@ export function App() {
 			icon: <Smile size={16} />,
 			label: "NewbieIcon",
 		},
+		{
+			key: "captcha",
+			icon: <ShieldCheck size={16} />,
+			label: "SlideVerify",
+		},
 	]
 
 	const renderDemo = () => {
@@ -50,6 +56,8 @@ export function App() {
 				return <TableDemo />
 			case "icon":
 				return <IconDemo />
+			case "captcha":
+				return <CaptchaDemo />
 			default:
 				return <div>Select a demo</div>
 		}

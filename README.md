@@ -145,6 +145,52 @@ Inherits from `ProColumns` with additional properties:
 />
 ```
 
+### SlideVerify
+
+High-performance slider verification component with behavior trajectory tracking.
+
+**Features:**
+
+- **High performance**: Smooth dragging with optimized rendering.
+- **Trajectory tracking**: Records `(x, y, t)` points during sliding for backend security analysis.
+- **Mobile support**: Full touch event support.
+- **Customizable**: Adjustable height, handle width, and text labels.
+- **Reset capability**: Programmatic reset support via ref.
+
+**Props:**
+
+| Property | Description | Type | Default |
+| --- | --- | --- | --- |
+| `active` | Whether the slider is active | `boolean` | `true` |
+| `onVerify` | Callback after successful verification | `(x: number, trail: TrailPoint[]) => void` | - |
+| `height` | Track height | `number` | `48` |
+| `handleWidth` | Slider handle width | `number` | `40` |
+| `text` | Default hint text | `string` | `'向右滑动完成验证'` |
+| `successText` | Success hint text | `string` | `'验证通过'` |
+| `className` | Custom container class | `string` | - |
+
+**Example:**
+
+```tsx
+import { SlideVerify } from 'jobsys-newbie-next'
+import type { SlideVerifyRef } from 'jobsys-newbie-next'
+
+function App() {
+  const verifyRef = useRef<SlideVerifyRef>(null)
+
+  return (
+    <SlideVerify
+      ref={verifyRef}
+      onVerify={(x, trail) => {
+        console.log('Final position:', x)
+        console.log('User behavior trail:', trail)
+      }}
+    />
+  )
+}
+```
+
+
 ## Development
 
 ```bash

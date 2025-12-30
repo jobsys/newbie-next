@@ -2,6 +2,7 @@
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import dts from "vite-plugin-dts"
+import progress from "vite-plugin-progress"
 import { resolve } from "path"
 
 // https://vite.dev/config/
@@ -11,6 +12,7 @@ export default defineConfig(({ command }) => {
 	return {
 		plugins: [
 			react(),
+			progress(),
 			// Only generate types in build mode
 			!isDev &&
 				dts({

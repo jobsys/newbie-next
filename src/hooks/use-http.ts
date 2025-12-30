@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import { type HttpInstance } from "../utils/http"
+import { defaultHttp, type HttpInstance } from "../utils/http"
 
 /**
  * HTTP 请求状态接口 (HTTP Request State Interface)
@@ -20,17 +20,17 @@ export interface HttpState<T = any> {
  * 这是一个通用的 Hook，结合 `createHttpClient` 生成的实例使用。
  * 它自动管理 `loading` 状态和 `error` 状态，简化组件内的异步逻辑。
  *
- * @param http - 通过 createHttpClient 创建的 HttpInstance 实例
+ * @param [http] - 可选。通过 createHttpClient 创建的 HttpInstance 实例。如果不传则使用 defaultHttp 实例。
  * @returns 包含状态（data, loading, error）和请求方法（get, post, put, delete）的对象
  *
  * @example
  * ```tsx
- * // 1. 初始化 http 实例 (建议在单独的 api 文件中)
- * const httpInstance = createHttpClient({ baseUrl: '/api' });
+ * // 1. 初始化 http 实例 (建议在单独的 app 启动处或 api 文件中)
+ * setupHttp({ baseUrl: '/api' });
  *
  * // 2. 在组件中使用
  * function UserProfile() {
- *   const { data, loading, error, get } = useHttp(httpInstance);
+ *   const { data, loading, error, get } = useHttp(); // 不传参则用 defaultHttp
  *
  *   useEffect(() => {
  *     get('/user/info');
@@ -43,7 +43,7 @@ export interface HttpState<T = any> {
  * }
  * ```
  */
-export function useHttp<T = any>(http: HttpInstance) {
+export function useHttp<T = any>(http: HttpInstance = defaultHttp) {
 	const [state, setState] = useState<HttpState<T>>({
 		data: undefined,
 		loading: false,

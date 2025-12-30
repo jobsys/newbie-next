@@ -87,7 +87,7 @@ export function IconDemo() {
 							<Text type="secondary">Check</Text>
 						</Space>
 					</Space>
-					<Card bodyStyle={{ padding: "12px", background: "#001529" }}>
+					<Card styles={{ body: { padding: "12px", background: "#001529" } }}>
 						<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 							{`import { User } from 'lucide-react';
 import { NewbieIcon } from '@jobsys/newbie-next';
@@ -130,7 +130,7 @@ import { NewbieIcon } from '@jobsys/newbie-next';
 						</Tag>
 					</Space>
 
-					<Card bodyStyle={{ padding: "12px", background: "#001529" }}>
+					<Card styles={{ body: { padding: "12px", background: "#001529" } }}>
 						<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 							{`<Button type="primary" icon={<NewbieIcon icon={Search} />}>搜索</Button>
 
@@ -164,7 +164,7 @@ import { NewbieIcon } from '@jobsys/newbie-next';
 						</Space>
 					</Space>
 
-					<Card bodyStyle={{ padding: "12px", background: "#001529" }}>
+					<Card styles={{ body: { padding: "12px", background: "#001529" } }}>
 						<pre style={{ margin: 0, color: "#fff", fontSize: "13px" }}>
 							{`// 尺寸与加粗
 <NewbieIcon icon={Heart} size={32} strokeWidth={3} />

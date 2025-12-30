@@ -12,6 +12,10 @@ export type { NewbieProviderProps, NewbieProviderConfig, NewbieContextValue, Com
 export { NewbieIcon } from "./components/icon"
 export type { NewbieIconProps } from "./components/icon"
 
+// Captcha
+export { SlideVerify } from "./components/captcha"
+export type { SlideVerifyProps, SlideVerifyRef, TrailPoint } from "./components/captcha"
+
 // Form (will be implemented)
 // export { NewbieForm } from './components/form'
 // export type { NewbieFormProps } from './components/form'
