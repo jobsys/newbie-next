@@ -18,14 +18,6 @@ export const DEFAULT_CONDITIONS: Record<string, Condition[]> = {
 		{ value: "null", label: "为空" },
 		{ value: "notNull", label: "不为空" },
 	],
-	text: [
-		{ value: "equal", label: "等于" },
-		{ value: "notEqual", label: "不等于" },
-		{ value: "include", label: "包含" },
-		{ value: "exclude", label: "不包含" },
-		{ value: "null", label: "为空" },
-		{ value: "notNull", label: "不为空" },
-	],
 	number: [
 		{ value: "equal", label: "等于" },
 		{ value: "notEqual", label: "不等于" },
@@ -93,6 +85,7 @@ export const DEFAULT_CONDITIONS: Record<string, Condition[]> = {
 		{ value: "notEqual", label: "不等于" },
 		{ value: "include", label: "包括子级" },
 	],
+	switch: [{ value: "equal", label: "等于" }],
 }
 
 /**

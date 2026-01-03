@@ -16,7 +16,7 @@ export function SearchDemo() {
 		{
 			title: "姓名",
 			dataIndex: "name",
-			valueType: "text",
+			valueType: "input",
 		},
 		{
 			title: "年龄",
@@ -51,6 +51,15 @@ export function SearchDemo() {
 				graduated: { text: "毕业" },
 				suspended: { text: "休学" },
 				dropped: { text: "退学" },
+			},
+		},
+		{
+			title: "是否启用",
+			dataIndex: "is_enabled",
+			valueType: "switch",
+			valueEnum: {
+				true: { text: "启用" },
+				false: { text: "禁用" },
 			},
 		},
 		{

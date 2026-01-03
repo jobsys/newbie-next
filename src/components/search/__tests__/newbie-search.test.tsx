@@ -10,7 +10,7 @@ import type { NewbieProColumn } from "../types"
 
 describe("NewbieSearch", () => {
 	it("should render search component", () => {
-		const columns: NewbieProColumn[] = [{ key: "name", valueType: "text", title: "姓名" }]
+		const columns: NewbieProColumn[] = [{ key: "name", valueType: "input", title: "姓名" }]
 
 		renderWithProviders(<NewbieSearch columns={columns} />)
 
@@ -19,7 +19,7 @@ describe("NewbieSearch", () => {
 	})
 
 	it("should call onSubmit when submit button is clicked", () => {
-		const columns: NewbieProColumn[] = [{ key: "name", valueType: "text", title: "姓名" }]
+		const columns: NewbieProColumn[] = [{ key: "name", valueType: "input", title: "姓名" }]
 		const onSubmit = vi.fn()
 
 		renderWithProviders(<NewbieSearch columns={columns} onSubmit={onSubmit} />)

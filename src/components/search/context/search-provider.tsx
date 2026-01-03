@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo, useEffect, useRef, type ReactNode } from "react"
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { arrayMove } from "@dnd-kit/sortable"
 import { SearchContext } from "./search-context"
-import type { QueryForm, FieldValue, SortForm, SortOrder, SearchCondition, NewbieProColumn } from "../types"
+import type { FieldValue, NewbieProColumn, QueryForm, SearchCondition, SortForm, SortOrder } from "../types"
 
 /**
  * SearchProvider props
@@ -157,8 +157,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 			const currentDepValues: any = {}
 
 			Object.keys(deps).forEach((depKey) => {
-				const val = queryForm[depKey]?.value
-				currentDepValues[depKey] = val
+				currentDepValues[depKey] = queryForm[depKey]?.value
 			})
 
 			loadOptions(field, currentDepValues)

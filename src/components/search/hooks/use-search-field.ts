@@ -65,7 +65,7 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 	const { getFieldValue, updateFieldValue } = useSearchContext()
 
 	const fieldKey = (field.dataIndex as string) || (field.key as string)
-	const valueType = (field.valueType as string) || "text"
+	const valueType = (field.valueType as string) || "input"
 
 	// Get current field value
 	const fieldValue = getFieldValue(fieldKey)
@@ -152,7 +152,7 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 			return value.join(" / ")
 		}
 
-		if (!value || (Array.isArray(value) && value.length === 0)) return ""
+		if (value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0)) return ""
 		return String(value)
 	}, [value, condition, valueType])
 

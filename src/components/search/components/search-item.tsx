@@ -99,7 +99,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	} = useSearchContext()
 
 	const fieldKey = (field.dataIndex as string) || (field.key as string)
-	const valueType = (field.valueType as string) || "text"
+	const valueType = (field.valueType as string) || "input"
 	const currentOptions = fieldOptions[fieldKey] || []
 
 	const [isOpen, setIsOpen] = useState(false)
@@ -126,7 +126,10 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				} else if (valueType === "date" || valueType === "dateTime") {
 					setDatePickerOpen(true)
 					if (inputRef.current?.focus) inputRef.current.focus()
-				} else if ((valueType === "text" || valueType === "textarea" || valueType === "digit" || valueType === "money") && inputRef.current) {
+				} else if (
+					(valueType === "input" || valueType === "textarea" || valueType === "digit" || valueType === "money") &&
+					inputRef.current
+				) {
 					if (inputRef.current.focus) inputRef.current.focus()
 					else if (inputRef.current.input) inputRef.current.input.focus()
 				}
@@ -162,7 +165,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 		}
 
 		let displayText = fieldState.displayValue
-		if (valueType === "select" && fieldState.value) {
+		if ((valueType === "select" || valueType === "switch") && fieldState.value !== undefined && fieldState.value !== null) {
 			if (field.valueEnum) {
 				if (Array.isArray(fieldState.value)) {
 					const labels = fieldState.value
@@ -173,10 +176,16 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						.filter(Boolean)
 					displayText = labels.join(", ")
 				} else {
-					const config = (field.valueEnum as any)[fieldState.value]
+					// Handle boolean keys in valueEnum (convert boolean value to string key if needed)
+					// But valueEnum keys are strings, so true -> "true", false -> "false", 1 -> "1", 0 -> "0"
+					let config = (field.valueEnum as any)[fieldState.value]
+					if (!config) {
+						// Try string conversion for boolean/number values
+						config = (field.valueEnum as any)[String(fieldState.value)]
+					}
 					displayText = typeof config === "object" ? config.text : String(config || fieldState.value)
 				}
-			} else if (currentOptions.length > 0) {
+			} else if (valueType === "select" && currentOptions.length > 0) {
 				if (Array.isArray(fieldState.value)) {
 					const labels = fieldState.value
 						.map((val: any) => {
@@ -189,6 +198,13 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 					const selectedOption = currentOptions.find((opt: any) => opt.value === fieldState.value)
 					if (selectedOption) displayText = selectedOption.label || selectedOption.text || String(selectedOption.value)
 				}
+			} else if (valueType === "switch") {
+				// Fallback for switch without valueEnum (though SearchItem switch case usually provides default options,
+				// they are internal to the renderInput. Masks need to replicate this logic or use the value itself).
+				// Since we don't have access to the internal switchOptions here easily without duplicating logic,
+				// we rely on valueEnum. If no valueEnum, we show boolean text.
+				if (fieldState.value === true) displayText = "是"
+				else if (fieldState.value === false) displayText = "否"
 			}
 		}
 		return displayText
@@ -206,7 +222,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	const getPopupContainer = () => panelRef.current || document.body
 
 	const renderConditionSelector = () => {
-		if (field.fieldProps?.disableConditions || globalDisableConditions || field.renderFormItem) return null
+		if (field.fieldProps?.disableConditions || globalDisableConditions || field.renderFormItem || valueType === "switch") return null
 		const menuItems: MenuProps["items"] = fieldState.conditions.map((condition) => ({
 			key: condition.value,
 			label: (
@@ -250,7 +266,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 		}
 
 		switch (valueType) {
-			case "text":
+			case "input":
 			case "password":
 				return (
 					<Input
@@ -405,6 +421,44 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 						onOpenChange={setDatePickerOpen}
 						autoFocus
 						showTime={valueType === "dateTime"}
+					/>
+				)
+			case "switch":
+				let switchOptions = [
+					{ label: "是", value: true },
+					{ label: "否", value: false },
+				]
+
+				if (field.valueEnum) {
+					switchOptions = Object.keys(field.valueEnum).map((key) => {
+						const val = (field.valueEnum as any)?.[key]
+						// valueEnum value can be object { text: '...', status: '...' } or just string
+						const label = typeof val === "object" && val ? val.text : val
+						// Try to cast key to boolean if it looks like one, or use as is
+						// Usually switch expects boolean, but enum keys are strings.
+						// We need to match the backend expectation.
+						// If key is "true"/"false" or "1"/"0", map to boolean.
+						let value: any = key
+						if (key === "true" || key === "1") value = true
+						if (key === "false" || key === "0") value = false
+
+						return { label, value }
+					})
+				}
+
+				return (
+					<Select
+						{...commonProps}
+						ref={selectRef}
+						value={fieldState.value}
+						onChange={(value) => fieldState.setValue(value)}
+						options={switchOptions}
+						allowClear
+						style={{ width: "100%", flex: 1 }}
+						getPopupContainer={getPopupContainer}
+						open={selectOpen}
+						onOpenChange={setSelectOpen}
+						autoFocus
 					/>
 				)
 			default:

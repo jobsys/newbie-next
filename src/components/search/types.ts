@@ -10,7 +10,7 @@ import type { ProColumns } from "@ant-design/pro-components"
 /**
  * Enhanced ProColumns for NewbieSearch
  */
-export type NewbieProColumn<T = any, ValueType = "text"> = ProColumns<T, ValueType> & {
+export type NewbieProColumn<T = any, ValueType = "input"> = ProColumns<T, ValueType> & {
 	/**
 	 * Field-level configuration for NewbieSearch
 	 */
