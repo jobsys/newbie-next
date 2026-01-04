@@ -65,8 +65,9 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		queryFields.forEach((field) => {
 			const fieldKey = (field.dataIndex as string) || (field.key as string)
 			if (!form[fieldKey]) {
+				const isTextType = field.valueType === "input" || field.valueType === "textarea" || field.valueType === "password"
 				form[fieldKey] = {
-					value: field.initialValue ?? (field.valueType === "digit" || field.valueType === "money" ? undefined : ""),
+					value: field.initialValue ?? (isTextType ? "" : undefined),
 					condition: disableConditions ? "equal" : (field.fieldProps?.defaultCondition ?? "equal"),
 					type: (field.valueType as string) || "text",
 				}
@@ -292,8 +293,9 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		(key: string) => {
 			const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
 			if (field) {
+				const isTextType = field.valueType === "input" || field.valueType === "textarea" || field.valueType === "password"
 				const resetValue: FieldValue = {
-					value: field.initialValue ?? (field.valueType === "digit" ? undefined : ""),
+					value: field.initialValue ?? (isTextType ? "" : undefined),
 					condition: field.fieldProps?.defaultCondition ?? "equal",
 					type: (field.valueType as string) || "text",
 				}

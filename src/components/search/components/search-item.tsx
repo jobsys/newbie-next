@@ -258,8 +258,9 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 
 	const renderInput = () => {
 		if (field.renderFormItem) return null
+		const placeholder = (field.fieldProps?.placeholder as string) || `搜索 ${field.title}`
 		const commonProps = {
-			placeholder: `搜索 ${field.title}`,
+			placeholder,
 			disabled: fieldState.disabled,
 			style: { flex: 1, minWidth: 0 },
 			...field.fieldProps,

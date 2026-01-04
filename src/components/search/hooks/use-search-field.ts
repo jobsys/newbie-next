@@ -71,7 +71,8 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 	const fieldValue = getFieldValue(fieldKey)
 
 	// Current value and condition
-	const value = fieldValue?.value ?? field.initialValue ?? ""
+	const isTextType = valueType === "input" || valueType === "textarea" || valueType === "password"
+	const value = fieldValue?.value ?? field.initialValue ?? (isTextType ? "" : undefined)
 	const condition: SearchCondition = fieldValue?.condition ?? field.fieldProps?.defaultCondition ?? "equal"
 
 	// Get available conditions
@@ -96,7 +97,8 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 
 			// If switching from null/notNull to other condition, reset value
 			const isOldNull = condition === "null" || condition === "notNull"
-			let newValue = isOldNull ? (field.initialValue ?? (valueType === "digit" ? undefined : "")) : value
+			const isTextType = valueType === "input" || valueType === "textarea" || valueType === "password"
+			let newValue = isOldNull ? (field.initialValue ?? (isTextType ? "" : undefined)) : value
 
 			// Handle value conversion
 			if (valueType === "select") {
