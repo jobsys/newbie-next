@@ -26,13 +26,13 @@ const { Title, Paragraph, Text } = Typography
  */
 export function IconDemo() {
 	const iconData = [
-		{ property: "icon", type: "LucideIcon", description: "任意从 lucide-react 导出的图标组件 (Any icon component from lucide-react)" },
-		{ property: "size", type: "number | string", description: "图标大小 (Icon size)，支持数字或字符串，默认 14" },
-		{ property: "strokeWidth", type: "number", description: "笔触粗细 (Stroke width)，默认 2" },
-		{ property: "spin", type: "boolean", description: "是否旋转 (Whether to spin)，常用于加载状态" },
-		{ property: "rotate", type: "number", description: "旋转角度 (Rotation angle)" },
-		{ property: "className", type: "string", description: "自定义类名 (Custom CSS class)" },
-		{ property: "style", type: "React.CSSProperties", description: "自定义内联样式 (Custom inline style)" },
+		{ property: "icon", type: "LucideIcon", default: "-", required: "是", description: "任意从 lucide-react 导出的图标组件" },
+		{ property: "size", type: "number | string", default: "14", required: "否", description: "图标大小，支持数字（像素）或字符串" },
+		{ property: "strokeWidth", type: "number", default: "2", required: "否", description: "笔触粗细" },
+		{ property: "spin", type: "boolean", default: "false", required: "否", description: "是否显示旋转动画" },
+		{ property: "rotate", type: "number", default: "0", required: "否", description: "旋转角度" },
+		{ property: "className", type: "string", default: "-", required: "否", description: "自定义类名" },
+		{ property: "style", type: "CSSProperties", default: "-", required: "否", description: "自定义内联样式" },
 	]
 
 	return (
@@ -183,9 +183,11 @@ import { NewbieIcon } from '@jobsys/newbie-next';
 				pagination={false}
 				rowKey="property"
 				columns={[
-					{ title: "属性", dataIndex: "property", key: "property", width: "25%", render: (text) => <Text code>{text}</Text> },
-					{ title: "类型", dataIndex: "type", key: "type", width: "25%", render: (text) => <Text type="secondary">{text}</Text> },
-					{ title: "描述", dataIndex: "description", key: "description" },
+					{ title: "属性", dataIndex: "property", key: "property", render: (text) => <Text code>{text}</Text> },
+					{ title: "类型", dataIndex: "type", key: "type", render: (text) => <Text type="secondary">{text}</Text> },
+					{ title: "默认值", dataIndex: "default", key: "default" },
+					{ title: "必填", dataIndex: "required", key: "required" },
+					{ title: "说明", dataIndex: "description", key: "description" },
 				]}
 				size="small"
 				bordered

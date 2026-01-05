@@ -16,6 +16,12 @@ export type { NewbieIconProps } from "./components/icon"
 export { SlideVerify } from "./components/captcha"
 export type { SlideVerifyProps, SlideVerifyRef, TrailPoint } from "./components/captcha"
 
+// Upload
+export { NewbieUpload } from "./components/upload/newbie-upload"
+export type { NewbieUploadProps, MediaItem } from "./components/upload/newbie-upload"
+export { ProFormNewbieUpload } from "./components/upload/pro-form-newbie-upload"
+export type { ProFormNewbieUploadProps } from "./components/upload/pro-form-newbie-upload"
+
 // Form (will be implemented)
 // export { NewbieForm } from './components/form'
 // export type { NewbieFormProps } from './components/form'

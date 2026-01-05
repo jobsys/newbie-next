@@ -78,6 +78,26 @@ export function createHttpClient(options: HttpOptions = {}, instance?: HttpInsta
 	http.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest"
 	http.defaults.withCredentials = true
 
+	// 从 meta 标签或 cookie 获取 CSRF token
+	const getCSRFToken = (): string | null => {
+		// 优先从 meta 标签获取
+		const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content")
+		if (metaToken) return metaToken
+
+		// 从 cookie 获取（Laravel 默认使用 XSRF-TOKEN）
+		const cookieMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/)
+		if (cookieMatch) {
+			return decodeURIComponent(cookieMatch[1])
+		}
+
+		return null
+	}
+
+	const csrfToken = getCSRFToken()
+	if (csrfToken) {
+		http.defaults.headers.common["X-CSRF-TOKEN"] = csrfToken
+	}
+
 	// 清除旧的拦截器 (Clear old interceptors if any)
 	// 注意：axios 没有官方 API 清除所有，这里仅针对简单场景
 	// 如果是全新实例则无所谓

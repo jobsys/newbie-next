@@ -104,20 +104,29 @@ export function CaptchaDemo() {
 				pagination={false}
 				rowKey="property"
 				dataSource={[
-					{ property: "active", type: "boolean", default: "true", description: "是否激活，未激活时无法拖动" },
-					{ property: "onVerify", type: "(x: number, trail: TrailPoint[]) => void", default: "-", description: "验证通过后的回调" },
-					{ property: "height", type: "number", default: "48", description: "轨道高度" },
-					{ property: "handleWidth", type: "number", default: "40", description: "滑块宽度" },
-					{ property: "text", type: "string", default: "向右滑动完成验证", description: "默认提示文字" },
-					{ property: "successText", type: "string", default: "验证通过", description: "成功提示文字" },
-					{ property: "className", type: "string", default: "-", description: "容器类名" },
+					{ property: "active", type: "boolean", default: "true", required: "否", description: "是否激活，未激活时无法拖动" },
+					{
+						property: "onVerify",
+						type: "(x: number, trail: TrailPoint[]) => void",
+						default: "-",
+						required: "是",
+						description: "验证通过后的回调",
+					},
+					{ property: "height", type: "number", default: "48", required: "否", description: "轨道高度" },
+					{ property: "handleWidth", type: "number", default: "40", required: "否", description: "滑块宽度" },
+					{ property: "text", type: "string", default: "向右滑动完成验证", required: "否", description: "默认提示文字" },
+					{ property: "successText", type: "string", default: "验证通过", required: "否", description: "成功提示文字" },
+					{ property: "className", type: "string", default: "-", required: "否", description: "容器类名" },
 				]}
 				columns={[
-					{ title: "属性", dataIndex: "property", key: "property" },
-					{ title: "类型", dataIndex: "type", key: "type", render: (t) => <Text code>{t}</Text> },
+					{ title: "属性", dataIndex: "property", key: "property", render: (t) => <Text code>{t}</Text> },
+					{ title: "类型", dataIndex: "type", key: "type", render: (t) => <Text type="secondary">{t}</Text> },
 					{ title: "默认值", dataIndex: "default", key: "default" },
-					{ title: "描述", dataIndex: "description", key: "description" },
+					{ title: "必填", dataIndex: "required", key: "required" },
+					{ title: "说明", dataIndex: "description", key: "description" },
 				]}
+				size="small"
+				bordered
 			/>
 		</div>
 	)

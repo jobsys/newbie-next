@@ -8,10 +8,12 @@ import React, { useState } from "react"
 import { NewbieProvider } from "../../src/components/provider"
 import { SearchDemo } from "./demos/search-demo"
 import { TableDemo } from "./demos/table-demo"
+import { UploadDemo } from "./demos/upload-demo"
 import { IconDemo } from "./demos/icon-demo"
 import { CaptchaDemo } from "./demos/captcha-demo"
+import { ProviderDemo } from "./demos/provider-demo"
 import { Layout, Menu, Typography, Card, theme, Space, Segmented } from "antd"
-import { Search, Table, Smile, ShieldCheck } from "lucide-react"
+import { Search, Table, Smile, ShieldCheck, CloudUpload, Settings as SettingsIcon } from "lucide-react"
 
 const { Header, Sider, Content } = Layout
 const { Title } = Typography
@@ -26,6 +28,11 @@ export function App() {
 	} = theme.useToken()
 
 	const menuItems = [
+		{
+			key: "provider",
+			icon: <SettingsIcon size={16} />,
+			label: "NewbieProvider",
+		},
 		{
 			key: "search",
 			icon: <Search size={16} />,
@@ -46,10 +53,17 @@ export function App() {
 			icon: <ShieldCheck size={16} />,
 			label: "SlideVerify",
 		},
+		{
+			key: "upload",
+			icon: <CloudUpload size={16} />,
+			label: "NewbieUpload",
+		},
 	]
 
 	const renderDemo = () => {
 		switch (currentDemo) {
+			case "provider":
+				return <ProviderDemo />
 			case "search":
 				return <SearchDemo />
 			case "table":
@@ -58,6 +72,8 @@ export function App() {
 				return <IconDemo />
 			case "captcha":
 				return <CaptchaDemo />
+			case "upload":
+				return <UploadDemo />
 			default:
 				return <div>Select a demo</div>
 		}

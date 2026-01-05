@@ -31,6 +31,8 @@ export interface ComponentDefaults {
 	NewbieSearch?: Record<string, any>
 	/** Default props for NewbieTable */
 	NewbieTable?: Record<string, any>
+	/** Default props for NewbieUpload (e.g. action, maxSize) */
+	NewbieUpload?: Record<string, any>
 	/** Default props for ProForm components */
 	ProForm?: Record<string, any>
 	ProFormText?: Record<string, any>

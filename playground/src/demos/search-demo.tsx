@@ -234,7 +234,9 @@ export function SearchDemo() {
 						<tr style={{ borderBottom: "1px solid #f0f0f0", textAlign: "left" }}>
 							<th style={{ padding: "12px 8px" }}>属性</th>
 							<th style={{ padding: "12px 8px" }}>类型</th>
-							<th style={{ padding: "12px 8px" }}>描述</th>
+							<th style={{ padding: "12px 8px" }}>默认值</th>
+							<th style={{ padding: "12px 8px" }}>必填</th>
+							<th style={{ padding: "12px 8px" }}>说明</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -245,6 +247,8 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">NewbieProColumn[]</Text>
 							</td>
+							<td style={{ padding: "12px 8px" }}>-</td>
+							<td style={{ padding: "12px 8px" }}>是</td>
 							<td style={{ padding: "12px 8px" }}>表格列配置（Ant Design ProTable 风格）。包含搜索字段和排序规则的统一配置。</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -252,8 +256,10 @@ export function SearchDemo() {
 								<Text code>onSubmit</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">{"(query: QueryForm, sort: SortForm) => void"}</Text>
+								<Text type="secondary">{"(query, sort) => void"}</Text>
 							</td>
+							<td style={{ padding: "12px 8px" }}>-</td>
+							<td style={{ padding: "12px 8px" }}>是</td>
 							<td style={{ padding: "12px 8px" }}>提交搜索时的回调</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -263,7 +269,11 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">boolean</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>某些字段变化时是否自动触发 onSubmit (默认 false)</td>
+							<td style={{ padding: "12px 8px" }}>
+								<Text code>false</Text>
+							</td>
+							<td style={{ padding: "12px 8px" }}>否</td>
+							<td style={{ padding: "12px 8px" }}>某些字段变化时是否自动触发 onSubmit</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
@@ -272,6 +282,10 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">boolean</Text>
 							</td>
+							<td style={{ padding: "12px 8px" }}>
+								<Text code>false</Text>
+							</td>
+							<td style={{ padding: "12px 8px" }}>否</td>
 							<td style={{ padding: "12px 8px" }}>是否在全局禁用条件选择</td>
 						</tr>
 					</tbody>
@@ -286,8 +300,9 @@ export function SearchDemo() {
 						<tr style={{ borderBottom: "1px solid #f0f0f0", textAlign: "left" }}>
 							<th style={{ padding: "12px 8px" }}>属性</th>
 							<th style={{ padding: "12px 8px" }}>类型</th>
+							<th style={{ padding: "12px 8px" }}>默认值</th>
 							<th style={{ padding: "12px 8px" }}>必填</th>
-							<th style={{ padding: "12px 8px" }}>描述</th>
+							<th style={{ padding: "12px 8px" }}>说明</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -298,7 +313,8 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">string</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>✓</td>
+							<td style={{ padding: "12px 8px" }}>-</td>
+							<td style={{ padding: "12px 8px" }}>是</td>
 							<td style={{ padding: "12px 8px" }}>字段选择器显示的名称</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -308,7 +324,8 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">string | string[]</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>✓</td>
+							<td style={{ padding: "12px 8px" }}>-</td>
+							<td style={{ padding: "12px 8px" }}>是</td>
 							<td style={{ padding: "12px 8px" }}>字段的唯一标识，在 QueryForm 中作为键名</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -316,20 +333,11 @@ export function SearchDemo() {
 								<Text code>valueType</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">'text' | 'digit' | 'select' | 'date' | 'dateTime' | 'cascader' | 'textarea'</Text>
+								<Text type="secondary">ValueType</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>-</td>
+							<td style={{ padding: "12px 8px" }}>'text'</td>
+							<td style={{ padding: "12px 8px" }}>否</td>
 							<td style={{ padding: "12px 8px" }}>字段类型，决定输入组件和默认筛选条件</td>
-						</tr>
-						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
-							<td style={{ padding: "12px 8px" }}>
-								<Text code>valueEnum</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>
-								<Text type="secondary">Object</Text>
-							</td>
-							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>枚举配置，用于 select 类型自动生成选项</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
@@ -339,12 +347,8 @@ export function SearchDemo() {
 								<Text type="secondary">Object</Text>
 							</td>
 							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>
-								组件原始属性，在此处可配置 NewbieSearch 特有项：
-								<br />- <Text code>expandable</Text>: select 平铺显示
-								<br />- <Text code>conditions</Text>: 自定义可用条件
-								<br />- <Text code>disableConditions</Text>: 禁用条件选择
-							</td>
+							<td style={{ padding: "12px 8px" }}>否</td>
+							<td style={{ padding: "12px 8px" }}>组件原始属性，在此处可配置 NewbieSearch 特有项： expandable, conditions 等。</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
 							<td style={{ padding: "12px 8px" }}>
@@ -353,7 +357,10 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">boolean</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>-</td>
+							<td style={{ padding: "12px 8px" }}>
+								<Text code>false</Text>
+							</td>
+							<td style={{ padding: "12px 8px" }}>否</td>
 							<td style={{ padding: "12px 8px" }}>是否开启该字段的排序功能</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -503,8 +510,9 @@ export function SearchDemo() {
 						<tr style={{ borderBottom: "1px solid #f0f0f0", textAlign: "left" }}>
 							<th style={{ padding: "12px 8px" }}>属性</th>
 							<th style={{ padding: "12px 8px" }}>类型</th>
+							<th style={{ padding: "12px 8px" }}>默认值</th>
 							<th style={{ padding: "12px 8px" }}>必填</th>
-							<th style={{ padding: "12px 8px" }}>描述</th>
+							<th style={{ padding: "12px 8px" }}>说明</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -515,7 +523,8 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">string</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>✓</td>
+							<td style={{ padding: "12px 8px" }}>-</td>
+							<td style={{ padding: "12px 8px" }}>是</td>
 							<td style={{ padding: "12px 8px" }}>排序字段的唯一标识，对应数据字段名</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -525,7 +534,8 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">string</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>✓</td>
+							<td style={{ padding: "12px 8px" }}>-</td>
+							<td style={{ padding: "12px 8px" }}>是</td>
 							<td style={{ padding: "12px 8px" }}>排序字段的显示名称</td>
 						</tr>
 						<tr style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -535,8 +545,11 @@ export function SearchDemo() {
 							<td style={{ padding: "12px 8px" }}>
 								<Text type="secondary">'asc' | 'desc'</Text>
 							</td>
-							<td style={{ padding: "12px 8px" }}>-</td>
-							<td style={{ padding: "12px 8px" }}>默认排序方向，不设置时默认为 'asc'（升序）</td>
+							<td style={{ padding: "12px 8px" }}>
+								<Text code>'asc'</Text>
+							</td>
+							<td style={{ padding: "12px 8px" }}>否</td>
+							<td style={{ padding: "12px 8px" }}>默认排序方向</td>
 						</tr>
 					</tbody>
 				</table>
