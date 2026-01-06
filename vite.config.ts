@@ -37,7 +37,7 @@ export default defineConfig(({ command }) => {
 							},
 							formats: ["es"],
 						},
-						rollupOptions: {
+						rolldownOptions: {
 							external: [
 								"react",
 								"react-dom",

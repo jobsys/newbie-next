@@ -1,4 +1,4 @@
-import { useRegexRule } from "../hooks/use-regex"
+import { useRegexRule } from "../use-regex"
 
 describe("useRegexRule", () => {
 	describe("email", () => {
