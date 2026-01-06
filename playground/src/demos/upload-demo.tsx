@@ -55,8 +55,23 @@ export const UploadDemo: React.FC = () => {
 					</Paragraph>
 				</Card>
 
-				{/* Case 3: ProForm 集成 */}
-				<Card title="3. ProForm 表单集成 (ProFormNewbieUpload)">
+				{/* Case 3: 头像上传 */}
+				<Card title="3. 头像上传 (Avatar Upload)">
+					<Paragraph>
+						设置 <Text code>listType="picture-circle"</Text> 可用于头像上传场景。通常限制 <Text code>maxCount=1</Text>。
+					</Paragraph>
+					<NewbieUpload
+						maxCount={1}
+						listType="picture-circle"
+						action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+						onChange={(val) => {
+							console.log("头像上传 ID:", val)
+						}}
+					/>
+				</Card>
+
+				{/* Case 4: ProForm 集成 */}
+				<Card title="4. ProForm 表单集成 (ProFormNewbieUpload)">
 					<Paragraph>
 						在 Ant Design ProForm 中配合 <Text code>ProFormNewbieUpload</Text> 使用。 它支持完整的校验逻辑，并且可以快捷配置 `multiple`,
 						`maxCount` 等常用项。

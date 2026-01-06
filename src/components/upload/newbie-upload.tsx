@@ -21,8 +21,12 @@ import { useNewbieContext } from "../provider"
 export interface MediaItem {
 	id: number | string
 	uuid?: string
+	uid?: string
 	url: string
+	thumb_url?: string
+	thumbUrl?: string
 	file_name?: string
+	name?: string
 	size?: number
 	mime_type?: string
 }
@@ -139,9 +143,10 @@ export const NewbieUpload: React.FC<NewbieUploadProps> = (props) => {
 				const item = val as any
 				return {
 					uid: String(item.id || index),
-					name: item.file_name || "file",
+					name: item.file_name || item.name || "file",
 					status: "done",
 					url: item.url,
+					thumbUrl: item.thumb_url || item.thumbUrl || item.url, // 优先使用缩略图
 					response: item,
 				}
 			}

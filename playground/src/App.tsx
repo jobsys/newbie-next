@@ -6,14 +6,16 @@
 
 import React, { useState } from "react"
 import { NewbieProvider } from "../../src/components/provider"
+
 import { SearchDemo } from "./demos/search-demo"
 import { TableDemo } from "./demos/table-demo"
 import { UploadDemo } from "./demos/upload-demo"
 import { IconDemo } from "./demos/icon-demo"
 import { CaptchaDemo } from "./demos/captcha-demo"
 import { ProviderDemo } from "./demos/provider-demo"
-import { Layout, Menu, Typography, Card, theme, Space, Segmented } from "antd"
-import { Search, Table, Smile, ShieldCheck, CloudUpload, Settings as SettingsIcon } from "lucide-react"
+import { HooksDemo } from "./demos/hooks-demo"
+import { Layout, Menu, Typography, Card, theme, Space, Segmented, type MenuProps } from "antd"
+import { Search, Table, Smile, ShieldCheck, CloudUpload, Settings as SettingsIcon, Webhook } from "lucide-react"
 
 const { Header, Sider, Content } = Layout
 const { Title } = Typography
@@ -27,7 +29,7 @@ export function App() {
 		token: { colorBgContainer, borderRadiusLG },
 	} = theme.useToken()
 
-	const menuItems = [
+	const menuItems: MenuProps["items"] = [
 		{
 			key: "provider",
 			icon: <SettingsIcon size={16} />,
@@ -58,12 +60,22 @@ export function App() {
 			icon: <CloudUpload size={16} />,
 			label: "NewbieUpload",
 		},
+		{
+			type: "divider",
+		},
+		{
+			key: "hooks",
+			icon: <Webhook size={16} />,
+			label: "Hooks",
+		},
 	]
 
 	const renderDemo = () => {
 		switch (currentDemo) {
 			case "provider":
 				return <ProviderDemo />
+			case "hooks":
+				return <HooksDemo />
 			case "search":
 				return <SearchDemo />
 			case "table":

@@ -18,6 +18,7 @@ export default defineConfig(({ command }) => {
 				dts({
 					insertTypesEntry: true,
 					include: ["src"],
+					exclude: ["src/test", "**/*.test.ts", "**/setup.ts", "**/playground/**"],
 				}),
 		].filter(Boolean),
 		resolve: {
@@ -46,6 +47,11 @@ export default defineConfig(({ command }) => {
 								"lucide-react",
 								"dayjs",
 								"lodash-es",
+								"@ant-design/icons",
+								"@dnd-kit/core",
+								"@dnd-kit/sortable",
+								"@dnd-kit/utilities",
+								"axios",
 							],
 							output: {
 								preserveModules: true,

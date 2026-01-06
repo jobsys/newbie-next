@@ -49,3 +49,4 @@ export type * from "./types"
 // HTTP Client & Hooks
 export * from "./utils/http"
 export * from "./hooks/use-http"
+export * from "./hooks/use-regex"
