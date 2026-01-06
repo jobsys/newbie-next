@@ -127,26 +127,15 @@ export const NewbieUpload: React.FC<NewbieUploadProps> = (props) => {
 		const values = Array.isArray(value) ? value : [value]
 
 		const newFileList: UploadFile[] = values.map((val: any, index: number) => {
-			// Try to find if this file already exists in current fileList to preserve metadata (like URL)
-			const id = typeof val === "object" && val !== null ? (val as any).id : val
-			const existingFile = fileList.find((f) => {
-				const fileId = f.response?.id || f.uid
-				return String(fileId) === String(id) || f.url === val
-			})
-
-			if (existingFile) {
-				return existingFile
-			}
-
 			// If it's already an object that looks like MediaItem, use its properties
 			if (typeof val === "object" && val !== null) {
 				const item = val as any
 				return {
-					uid: String(item.id || index),
+					uid: String(item.id || item.uid || index),
 					name: item.file_name || item.name || "file",
-					status: "done",
-					url: item.url,
-					thumbUrl: item.thumb_url || item.thumbUrl || item.url, // 优先使用缩略图
+					status: "done" as const,
+					url: item.url || item.original_url,
+					thumbUrl: item.thumb_url || item.thumbUrl || item.url || item.original_url,
 					response: item,
 				}
 			}
@@ -156,8 +145,9 @@ export const NewbieUpload: React.FC<NewbieUploadProps> = (props) => {
 				return {
 					uid: String(index),
 					name: "image",
-					status: "done",
+					status: "done" as const,
 					url: val,
+					thumbUrl: val,
 					response: { url: val },
 				}
 			}
@@ -166,20 +156,22 @@ export const NewbieUpload: React.FC<NewbieUploadProps> = (props) => {
 			return {
 				uid: String(val),
 				name: "file",
-				status: "done",
+				status: "done" as const,
 				response: { id: val },
 			}
 		})
 
-		// Avoid re-render loop if deep equal (simplified)
-		const currentKeys = fileList.map((f) => String(f.response?.id || f.uid || f.url))
-		const newKeys = newFileList.map((f) => String(f.response?.id || f.uid || f.url))
+		// Only update if the content actually changed
+		setFileList((prevFileList) => {
+			const prevKeys = prevFileList.map((f) => String(f.response?.id || f.uid || f.url)).join(",")
+			const newKeys = newFileList.map((f) => String(f.response?.id || f.uid || f.url)).join(",")
 
-		if (JSON.stringify(currentKeys) === JSON.stringify(newKeys)) {
-			return
-		}
+			if (prevKeys === newKeys) {
+				return prevFileList
+			}
 
-		setFileList(newFileList)
+			return newFileList
+		})
 	}, [value])
 
 	const handleChange: UploadProps["onChange"] = (info) => {

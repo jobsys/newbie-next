@@ -1,4 +1,4 @@
-import { ProFormItem } from "@ant-design/pro-components"
+import { Form } from "antd"
 import type { FormItemProps } from "antd"
 import React from "react"
 import { NewbieUpload } from "./newbie-upload"
@@ -9,7 +9,7 @@ import type { NewbieUploadProps } from "./newbie-upload"
  */
 export interface ProFormNewbieUploadProps extends FormItemProps {
 	/** 透传给 NewbieUpload 的属性 */
-	fieldProps?: Omit<NewbieUploadProps, "value" | "onChange">
+	fieldProps?: NewbieUploadProps
 	/** 是否支持多文件上传 */
 	multiple?: boolean
 	/** 最大文件数量 */
@@ -29,22 +29,26 @@ export interface ProFormNewbieUploadProps extends FormItemProps {
 /**
  * ProFormNewbieUpload 表单上传组件
  *
- * 适配 Ant Design Pro Form 的上传组件。
+ * @deprecated 由于在 ProForm 中存在 Context 和 Value 注入的兼容性问题，该组件已被废弃。
+ * 请直接使用 Ant Design 的 Form.Item 或 ProFormItem 配合 NewbieUpload 使用。
  *
  * @example
  * ```tsx
- * <ProFormNewbieUpload
- *   name="avatar"
- *   label="头像"
- *   action="/api/upload"
- * />
+ * // 推荐写法：
+ * <ProFormItem name="avatar">
+ *   <NewbieUpload action="/api/upload" />
+ * </ProFormItem>
  * ```
  */
 export const ProFormNewbieUpload: React.FC<ProFormNewbieUploadProps> = (props) => {
 	const { fieldProps, multiple, maxCount, maxSize, accept, action, listType, parseResponse, ...rest } = props
 
+	React.useEffect(() => {
+		console.warn("[jobsys-newbie-next] ProFormNewbieUpload is deprecated. Please use Form.Item or ProFormItem with NewbieUpload instead.")
+	}, [])
+
 	return (
-		<ProFormItem {...rest}>
+		<Form.Item {...rest}>
 			<NewbieUpload
 				{...fieldProps}
 				multiple={multiple}
@@ -55,6 +59,6 @@ export const ProFormNewbieUpload: React.FC<ProFormNewbieUploadProps> = (props) =
 				listType={listType}
 				parseResponse={parseResponse}
 			/>
-		</ProFormItem>
+		</Form.Item>
 	)
 }
