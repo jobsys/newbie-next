@@ -7,7 +7,7 @@
  */
 
 import { useState, useRef, useEffect, useMemo } from "react"
-import { Input, InputNumber, Select, Button, Dropdown, DatePicker, Popover, Tooltip, Space, Cascader, Tag } from "antd"
+import { Input, InputNumber, Select, Button, Dropdown, DatePicker, Popover, Tooltip, Space, Cascader, Tag, theme } from "antd"
 import type { Dayjs } from "dayjs"
 import dayjs from "dayjs"
 import weekday from "dayjs/plugin/weekday"
@@ -87,6 +87,7 @@ export interface SearchItemProps {
  * SearchItem Component
  */
 export function SearchItem(props: SearchItemProps): JSX.Element {
+	const { token } = theme.useToken()
 	const { field } = props
 	const fieldState = useSearchField({ field })
 	const {
@@ -227,7 +228,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 			key: condition.value,
 			label: (
 				<span style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
-					<span style={{ color: "#1890ff", display: "flex", alignItems: "center" }}>{getConditionIcon(condition.value)}</span>
+					<span style={{ color: token.colorPrimary, display: "flex", alignItems: "center" }}>{getConditionIcon(condition.value)}</span>
 					{condition.label}
 				</span>
 			),
@@ -247,9 +248,15 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 							height: "32px",
 						}}
 					>
-						<span style={{ color: "#1890ff", display: "flex", alignItems: "center" }}>{getConditionIcon(fieldState.condition)}</span>
-						<span style={{ display: "flex", alignItems: "center" }}>{currentConditionLabel}</span>
-						<NewbieIcon icon={ChevronDown} size={12} style={{ display: "flex", alignItems: "center", marginLeft: "4px" }} />
+						<span style={{ color: token.colorPrimary, display: "flex", alignItems: "center" }}>
+							{getConditionIcon(fieldState.condition)}
+						</span>
+						<span style={{ display: "flex", alignItems: "center", color: token.colorText }}>{currentConditionLabel}</span>
+						<NewbieIcon
+							icon={ChevronDown}
+							size={12}
+							style={{ display: "flex", alignItems: "center", marginLeft: "4px", color: token.colorTextSecondary }}
+						/>
 					</Button>
 				</Dropdown>
 			</div>
@@ -295,7 +302,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 								onChange={(value) => fieldState.setValue([value ?? undefined, rangeValue[1]])}
 								style={{ flex: 1 }}
 							/>
-							<span style={{ color: "#999" }}>~</span>
+							<span style={{ color: token.colorTextSecondary }}>~</span>
 							<InputNumber
 								placeholder="最大值"
 								value={rangeValue[1]}
@@ -472,7 +479,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 			<div ref={panelRef} style={{ minWidth: "300px", padding: "8px" }}>
 				{field.renderFormItem ? (
 					// In a real scenario, we might want to support this, but per user request, we focus on standard
-					<div style={{ padding: 8, color: "#999" }}>[Custom Render Not Yet Re-implemented]</div>
+					<div style={{ padding: 8, color: token.colorTextSecondary }}>[Custom Render Not Yet Re-implemented]</div>
 				) : (
 					<>
 						<div
@@ -482,12 +489,20 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 								justifyContent: "space-between",
 								marginBottom: "8px",
 								paddingBottom: "8px",
-								borderBottom: "1px solid #f0f0f0",
+								borderBottom: `1px solid ${token.colorBorderSecondary}`,
 							}}
 						>
-							<div style={{ fontSize: "13px", color: "#000000d9", fontWeight: 500 }}>
+							<div style={{ fontSize: "13px", color: token.colorText, fontWeight: 500 }}>
 								搜索{" "}
-								<span style={{ fontFamily: "monospace", background: "#f5f5f5", padding: "1px 3px", borderRadius: "3px" }}>
+								<span
+									style={{
+										fontFamily: "monospace",
+										background: token.colorFillQuaternary,
+										padding: "1px 3px",
+										borderRadius: "3px",
+										color: token.colorText,
+									}}
+								>
 									{field.title as React.ReactNode}
 								</span>
 							</div>
@@ -507,7 +522,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				key: condition.value,
 				label: (
 					<span style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
-						<span style={{ color: "#1890ff", display: "flex", alignItems: "center" }}>{getConditionIcon(condition.value)}</span>
+						<span style={{ color: token.colorPrimary, display: "flex", alignItems: "center" }}>{getConditionIcon(condition.value)}</span>
 						{condition.label}
 					</span>
 				),
@@ -521,14 +536,14 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 								type="text"
 								style={{
 									borderRadius: "6px 0 0 6px",
-									backgroundColor: "#f5f5f5",
-									border: "1px solid #d9d9d9",
+									backgroundColor: token.colorFillQuaternary,
+									border: `1px solid ${token.colorBorder}`,
 									borderRight: "none",
 									height: "32px",
 									padding: "0 12px",
 								}}
 							>
-								<span style={{ color: "#1890ff", display: "flex", alignItems: "center" }}>
+								<span style={{ color: token.colorPrimary, display: "flex", alignItems: "center" }}>
 									{getConditionIcon(fieldState.condition)}
 								</span>
 							</Button>
@@ -593,14 +608,18 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 
 	if (valueType === "select" && field.fieldProps?.expandable) {
 		return (
-			<div style={{ display: "flex", padding: "8px 0", borderBottom: "1px dashed #f0f0f0", width: "100%" }}>
-				<div style={{ width: "80px", flexShrink: 0, color: "#333", fontSize: "13px", fontWeight: 400, paddingTop: "2px" }}>
+			<div style={{ display: "flex", padding: "8px 0", borderBottom: `1px dashed ${token.colorBorderSecondary}`, width: "100%" }}>
+				<div style={{ width: "80px", flexShrink: 0, color: token.colorText, fontSize: "13px", fontWeight: 400, paddingTop: "2px" }}>
 					{field.title as React.ReactNode}:
 				</div>
 				<div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
 					<div>{renderTiledSelect()}</div>
 					{field.fieldProps?.expandable === "multiple" && (
-						<div style={{ fontSize: "12px", color: "#999", marginLeft: "12px", whiteSpace: "nowrap", paddingTop: "2px" }}>(可多选)</div>
+						<div
+							style={{ fontSize: "12px", color: token.colorTextSecondary, marginLeft: "12px", whiteSpace: "nowrap", paddingTop: "2px" }}
+						>
+							(可多选)
+						</div>
 					)}
 				</div>
 			</div>
@@ -609,7 +628,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 
 	return (
 		<div style={{ marginBottom: "8px" }}>
-			<div style={{ marginBottom: "4px", fontSize: "13px", color: "#333", fontWeight: 400 }}>{field.title as React.ReactNode}</div>
+			<div style={{ marginBottom: "4px", fontSize: "13px", color: token.colorText, fontWeight: 400 }}>{field.title as React.ReactNode}</div>
 			<Popover
 				content={renderPanelContent()}
 				trigger="click"

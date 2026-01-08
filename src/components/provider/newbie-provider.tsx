@@ -8,6 +8,7 @@
 import { createContext, useContext, useMemo } from "react"
 import { ConfigProvider, theme as antdTheme, App as AntApp } from "antd"
 import { StyleProvider } from "@ant-design/cssinjs"
+import { ProConfigProvider } from "@ant-design/pro-components"
 import zhCN from "antd/locale/zh_CN"
 import type { NewbieProviderProps, NewbieProviderConfig, NewbieContextValue } from "./types"
 import { deepMerge } from "../../utils/merge"
@@ -83,8 +84,9 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 	)
 
 	// Build Ant Design Theme
+	const isDark = config.themeMode === "dark"
+
 	const antdThemeConfig = useMemo(() => {
-		const isDark = config.themeMode === "dark"
 		const theme = {
 			algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
 			token: {} as Record<string, any>,
@@ -140,7 +142,9 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 		<StyleProvider hashPriority="high">
 			<ConfigProvider locale={antdLocale} theme={antdThemeConfig} componentSize={componentSize}>
 				<AntApp>
-					<NewbieContext.Provider value={contextValue}>{children}</NewbieContext.Provider>
+					<ProConfigProvider dark={isDark} token={antdThemeConfig.token}>
+						<NewbieContext.Provider value={contextValue}>{children}</NewbieContext.Provider>
+					</ProConfigProvider>
 				</AntApp>
 			</ConfigProvider>
 		</StyleProvider>

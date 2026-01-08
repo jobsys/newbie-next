@@ -120,6 +120,31 @@ export type { NewbieUploadProps } from "./components/upload/newbie-upload"
 export { ProFormNewbieUpload } from "./components/upload/pro-form-newbie-upload"
 ```
 
+### 5. 暗黑模式支持规范
+
+所有组件必须原生支持暗黑模式，严禁硬编码颜色。
+
+- **禁止硬编码**: 严禁在样式中使用 Hex/RGB 颜色字符串（如 `#fff`, `#f0f0f0`, `#000`）。
+- **Token 获取**: 必须导入 `theme` 并使用 `theme.useToken()` 获取 Ant Design 的 Design Token。
+- **样式应用**:
+  - **背景色**: 使用 `token.colorBgContainer` (默认背景), `token.colorFillQuaternary` (浅灰背景/Hover), `token.colorFillAlter` (强调背景)。
+  - **文本色**: 使用 `token.colorText` (正文), `token.colorTextSecondary` (次要), `token.colorPrimary` (品牌色)。
+  - **边框色**: 使用 `token.colorBorder` (默认边框), `token.colorBorderSecondary` (分割线)。
+- **一致性**: 确保组件在 `NewbieProvider` 的 `themeMode` 切换时能即时响应颜色变化。
+
+```tsx
+import { theme } from "antd";
+
+const MyComponent = () => {
+  const { token } = theme.useToken();
+  return (
+    <div style={{ background: token.colorBgContainer, border: `1px solid ${token.colorBorder}` }}>
+      <span style={{ color: token.colorText }}>Content</span>
+    </div>
+  );
+};
+```
+
 ## 常用组件指南
 
 ### 1. NewbieSearch

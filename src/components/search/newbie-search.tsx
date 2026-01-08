@@ -16,7 +16,7 @@
  */
 
 import { useState, useRef, useEffect } from "react"
-import { Button, Space, Tag, Popover, Select, Divider, Typography } from "antd"
+import { Button, Space, Tag, Popover, Select, Divider, Typography, theme } from "antd"
 import { Search, RotateCw, ChevronDown, ChevronUp, XCircle, ArrowUpDown, SortAsc, SortDesc, Trash2, Plus, GripVertical } from "lucide-react"
 import { SearchProvider } from "./context/search-provider"
 import { useSearchContext } from "./context/search-context"
@@ -32,6 +32,7 @@ import { CSS } from "@dnd-kit/utilities"
  * SortableItem Component
  */
 function SortableItem({ sort, field }: { sort: SortField; field: NewbieProColumn }): JSX.Element {
+	const { token } = theme.useToken()
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sort.key })
 	const { removeSort, updateSort } = useSearchContext()
 
@@ -41,10 +42,10 @@ function SortableItem({ sort, field }: { sort: SortField; field: NewbieProColumn
 		display: "flex",
 		alignItems: "center",
 		justifyContent: "space-between",
-		background: isDragging ? "#fafafa" : "#fff",
+		background: isDragging ? token.colorFillAlter : token.colorBgContainer,
 		padding: "8px 12px",
 		borderRadius: 6,
-		border: "1px solid #f0f0f0",
+		border: `1px solid ${token.colorBorderSecondary}`,
 		marginBottom: 8,
 		zIndex: isDragging ? 1 : 0,
 		position: isDragging ? "relative" : ("static" as any),
@@ -54,10 +55,14 @@ function SortableItem({ sort, field }: { sort: SortField; field: NewbieProColumn
 	return (
 		<div ref={setNodeRef} style={style}>
 			<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-				<div {...attributes} {...listeners} style={{ cursor: "grab", display: "flex", alignItems: "center", color: "#999" }}>
+				<div
+					{...attributes}
+					{...listeners}
+					style={{ cursor: "grab", display: "flex", alignItems: "center", color: token.colorTextSecondary }}
+				>
 					<NewbieIcon icon={GripVertical} />
 				</div>
-				<span style={{ fontWeight: 500 }}>{field.title as React.ReactNode}</span>
+				<span style={{ fontWeight: 500, color: token.colorText }}>{field.title as React.ReactNode}</span>
 			</div>
 			<Space size={4}>
 				<Button
@@ -94,6 +99,7 @@ function SortableItem({ sort, field }: { sort: SortField; field: NewbieProColumn
  * Internal component that renders sort configuration
  */
 function SortPopoverContent(): JSX.Element {
+	const { token } = theme.useToken()
 	const { sortFields, sortForm, addSort, reorderSort } = useSearchContext()
 
 	const sensors = useSensors(
@@ -120,7 +126,7 @@ function SortPopoverContent(): JSX.Element {
 	})
 
 	if (sortFields.length === 0) {
-		return <div style={{ padding: 12, textAlign: "center", color: "#999" }}>暂无排序字段</div>
+		return <div style={{ padding: 12, textAlign: "center", color: token.colorTextSecondary }}>暂无排序字段</div>
 	}
 
 	return (
@@ -176,6 +182,7 @@ export function NewbieSearch(props: NewbieSearchProps): JSX.Element {
 }
 
 function SearchFields(): JSX.Element {
+	const { token } = theme.useToken()
 	const {
 		queryFields,
 		sortFields,
@@ -281,6 +288,7 @@ function SearchFields(): JSX.Element {
 				label,
 				field,
 				type: "filter",
+				typeDisplay: "筛选",
 			}
 		})
 		.filter(Boolean) as Array<{ key: string; label: string; field: any; type: "filter" }>
@@ -327,11 +335,11 @@ function SearchFields(): JSX.Element {
 		<div
 			ref={containerRef}
 			style={{
-				background: "#fff",
+				background: token.colorBgContainer,
 				padding: "16px",
 				borderRadius: "8px",
-				boxShadow: "0 1px 2px rgba(0, 0, 0, 0.03)",
-				border: "1px solid #f0f0f0",
+				boxShadow: token.boxShadowTertiary,
+				border: `1px solid ${token.colorBorderSecondary}`,
 			}}
 		>
 			{/* Expandable (Tiled) fields - Full width rows */}
@@ -366,7 +374,7 @@ function SearchFields(): JSX.Element {
 					display: "flex",
 					justifyContent: "space-between",
 					alignItems: "center",
-					borderTop: "1px solid #f5f5f5",
+					borderTop: `1px solid ${token.colorBorderSecondary}`,
 					paddingTop: "12px",
 				}}
 			>
@@ -424,14 +432,16 @@ function SearchFields(): JSX.Element {
 					style={{
 						marginTop: "12px",
 						padding: "10px 12px",
-						background: "#fafafa",
+						background: token.colorFillAlter,
 						borderRadius: "4px",
 						display: "flex",
 						alignItems: "flex-start",
 						gap: "8px",
 					}}
 				>
-					<div style={{ fontSize: "12px", color: "#8c8c8c", fontWeight: 500, marginTop: "4px", whiteSpace: "nowrap" }}>当前筛选:</div>
+					<div style={{ fontSize: "12px", color: token.colorTextSecondary, fontWeight: 500, marginTop: "4px", whiteSpace: "nowrap" }}>
+						当前筛选:
+					</div>
 					<div style={{ flex: 1 }}>
 						<Space size={[8, 8]} wrap>
 							{allActiveTags.map((tag) => (
@@ -449,8 +459,6 @@ function SearchFields(): JSX.Element {
 									style={{
 										margin: 0,
 										borderRadius: "4px",
-										background: "#fff",
-										border: tag.type === "sort" ? "1px solid #d3adf7" : "1px solid #d1e9ff",
 										padding: "2px 8px",
 									}}
 								>
