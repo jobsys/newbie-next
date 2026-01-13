@@ -37,8 +37,8 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		const sFields: any[] = []
 
 		columns.forEach((col) => {
-			const { dataIndex, key, hideInSearch, sorter } = col
-			const fieldKey = (dataIndex as string) || (key as string)
+			const { dataIndex, key, hideInSearch, sorter, fieldProps } = col
+			const fieldKey = (fieldProps?.name as string) || (dataIndex as string) || (key as string)
 
 			if (!fieldKey || fieldKey === "action" || fieldKey === "option") return
 
@@ -63,7 +63,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	const initialForm = useMemo<QueryForm>(() => {
 		const form: QueryForm = { ...initialQueryForm }
 		queryFields.forEach((field) => {
-			const fieldKey = (field.dataIndex as string) || (field.key as string)
+			const fieldKey = (field.fieldProps?.name as string) || (field.dataIndex as string) || (field.key as string)
 			if (!form[fieldKey]) {
 				const isTextType = field.valueType === "input" || field.valueType === "textarea" || field.valueType === "password"
 				form[fieldKey] = {
@@ -86,7 +86,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		sortFields.forEach((field) => {
 			if (field.defaultSortOrder) {
 				sorts.push({
-					key: (field.dataIndex as string) || (field.key as string),
+					key: (field.fieldProps?.name as string) || (field.dataIndex as string) || (field.key as string),
 					order: field.defaultSortOrder === "ascend" ? "asc" : "desc",
 				})
 			}
@@ -101,7 +101,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	 * Dynamic Request Handling
 	 */
 	const loadOptions = useCallback(async (field: NewbieProColumn, currentParams: any = {}) => {
-		const fieldKey = (field.dataIndex as string) || (field.key as string)
+		const fieldKey = (field.fieldProps?.name as string) || (field.dataIndex as string) || (field.key as string)
 		if (!field.request || loadingRef.current[fieldKey]) return
 
 		loadingRef.current[fieldKey] = true
@@ -123,7 +123,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	useEffect(() => {
 		const staticOptions: Record<string, any[]> = {}
 		queryFields.forEach((field) => {
-			const key = (field.dataIndex as string) || (field.key as string)
+			const key = (field.fieldProps?.name as string) || (field.dataIndex as string) || (field.key as string)
 			if (field.fieldProps?.options) {
 				staticOptions[key] = field.fieldProps.options
 			} else if (field.valueEnum) {
@@ -173,7 +173,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 			const filteredQuery: QueryForm = {}
 
 			Object.entries(qForm).forEach(([key, fieldValue]) => {
-				const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
+				const field = queryFields.find((f) => ((f.fieldProps?.name as string) || (f.dataIndex as string) || (f.key as string)) === key)
 
 				const isValid = (() => {
 					const { value, condition } = fieldValue
@@ -219,7 +219,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 
 	const isFieldValueValid = useCallback(
 		(fieldKey: string, fieldValue: FieldValue) => {
-			const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === fieldKey)
+			const field = queryFields.find((f) => ((f.fieldProps?.name as string) || (f.dataIndex as string) || (f.key as string)) === fieldKey)
 			const { value, condition } = fieldValue
 
 			if (!field) return value !== undefined && value !== null && value !== ""
@@ -237,7 +237,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		(key: string, order?: SortOrder) => {
 			setSortForm((prev) => {
 				if (prev.find((s) => s.key === key)) return prev
-				const field = sortFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
+				const field = sortFields.find((f) => ((f.fieldProps?.name as string) || (f.dataIndex as string) || (f.key as string)) === key)
 				const defaultOrder = order || (field?.defaultSortOrder === "descend" ? "desc" : "asc")
 				return [...prev, { key, order: defaultOrder }]
 			})
@@ -264,7 +264,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 				if (existing) {
 					return prev.map((s) => (s.key === key ? { ...s, order: s.order === "asc" ? "desc" : "asc" } : s))
 				}
-				const field = sortFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
+				const field = sortFields.find((f) => ((f.fieldProps?.name as string) || (f.dataIndex as string) || (f.key as string)) === key)
 				return [...prev, { key, order: field?.defaultSortOrder === "descend" ? "desc" : "asc" }]
 			})
 		},
@@ -277,7 +277,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		(key: string, value: any, condition?: SearchCondition, type?: string) => {
 			setQueryForm((prev) => {
 				const existing = prev[key] || {}
-				const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
+				const field = queryFields.find((f) => ((f.fieldProps?.name as string) || (f.dataIndex as string) || (f.key as string)) === key)
 				const newValue = {
 					value: condition !== undefined ? value : (value?.value ?? value),
 					condition: condition ?? value?.condition ?? existing.condition ?? "equal",
@@ -291,7 +291,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 
 	const resetFieldValue = useCallback(
 		(key: string) => {
-			const field = queryFields.find((f) => ((f.dataIndex as string) || (f.key as string)) === key)
+			const field = queryFields.find((f) => ((f.fieldProps?.name as string) || (f.dataIndex as string) || (f.key as string)) === key)
 			if (field) {
 				const isTextType = field.valueType === "input" || field.valueType === "textarea" || field.valueType === "password"
 				const resetValue: FieldValue = {

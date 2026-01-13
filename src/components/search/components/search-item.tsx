@@ -99,7 +99,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 		fieldOptions,
 	} = useSearchContext()
 
-	const fieldKey = (field.dataIndex as string) || (field.key as string)
+	const fieldKey = (field.fieldProps?.name as string) || (field.dataIndex as string) || (field.key as string)
 	const valueType = (field.valueType as string) || "input"
 	const currentOptions = fieldOptions[fieldKey] || []
 

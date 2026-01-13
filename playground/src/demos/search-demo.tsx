@@ -45,6 +45,7 @@ export function SearchDemo() {
 			valueType: "select",
 			fieldProps: {
 				expandable: "single",
+				name: "another-name",
 			},
 			valueEnum: {
 				studying: { text: "在读" },

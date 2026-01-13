@@ -64,7 +64,7 @@ export function useSearchField(options: UseSearchFieldOptions): UseSearchFieldRe
 	const { field } = options
 	const { getFieldValue, updateFieldValue } = useSearchContext()
 
-	const fieldKey = (field.dataIndex as string) || (field.key as string)
+	const fieldKey = (field.fieldProps?.name as string) || (field.dataIndex as string) || (field.key as string)
 	const valueType = (field.valueType as string) || "input"
 
 	// Get current field value

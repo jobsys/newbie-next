@@ -23,6 +23,8 @@ export type NewbieProColumn<T = any, ValueType = "input"> = ProColumns<T, ValueT
 		disableConditions?: boolean
 		/** Whether to show options as tiled (for select fields) */
 		expandable?: boolean | "single" | "multiple"
+		/** Custom field name for search parameter key */
+		name?: string
 	}
 }
 
