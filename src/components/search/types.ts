@@ -14,7 +14,7 @@ export type NewbieProColumn<T = any, ValueType = "input"> = ProColumnType<T, Val
 	/**
 	 * Field-level configuration for NewbieSearch
 	 */
-	hideInSearch?: boolean
+
 	renderFormItem?: any
 	fieldProps?: any & {
 		/** Available conditions for this field */
@@ -117,4 +117,8 @@ export interface NewbieSearchProps {
 	 * Auto query on change
 	 */
 	autoQuery?: boolean
+	/**
+	 * Transparent background (no border/shadow)
+	 */
+	ghost?: boolean
 }

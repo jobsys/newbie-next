@@ -5,18 +5,15 @@
  * Acts as a UI adapter to handle themes, colors, and density across different antd versions.
  */
 
-import { createContext, useContext, useMemo } from "react"
+import { useMemo } from "react"
 import { ConfigProvider, theme as antdTheme, App as AntApp } from "antd"
 import { StyleProvider } from "@ant-design/cssinjs"
 import { ProConfigProvider } from "@ant-design/pro-components"
+
 import zhCN from "antd/locale/zh_CN"
 import type { NewbieProviderProps, NewbieProviderConfig, NewbieContextValue } from "./types"
+import { NewbieContext } from "./context"
 import { deepMerge } from "../../utils/merge"
-
-/**
- * NewbieContext
- */
-const NewbieContext = createContext<NewbieContextValue | null>(null)
 
 /**
  * Default configuration
@@ -26,17 +23,6 @@ const defaultConfig: NewbieProviderConfig = {
 	themeMode: "light",
 	density: "normal",
 	defaults: {},
-}
-
-/**
- * Hook to access NewbieContext
- */
-export function useNewbieContext(): NewbieContextValue {
-	const context = useContext(NewbieContext)
-	if (!context) {
-		throw new Error("useNewbieContext must be used within NewbieProvider")
-	}
-	return context
 }
 
 /**
@@ -84,7 +70,7 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 	)
 
 	// Build Ant Design Theme
-	const isDark = config.themeMode === "dark"
+	const isDark = (themeMode || config.themeMode) === "dark"
 
 	const antdThemeConfig = useMemo(() => {
 		const theme = {
@@ -103,28 +89,27 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 				rose: "#eb2f96",
 				violet: "#722ed1",
 				yellow: "#fadb14",
-				default: "#1677ff",
 			}
 			return colorMap[color] || color
 		}
 
-		if (config.primaryColor) {
-			theme.token.colorPrimary = getColor(config.primaryColor)
+		if (primaryColor || config.primaryColor) {
+			theme.token.colorPrimary = getColor(primaryColor || config.primaryColor)
 		}
 
 		// Density translation
 		if (config.density === "compact") {
-			theme.token.controlHeight = 28
-			theme.token.fontSize = 12
+			theme.token.controlHeight = 30
+			theme.token.fontSize = 13
 			theme.token.padding = 12
 		} else if (config.density === "loose") {
-			theme.token.controlHeight = 36
-			theme.token.fontSize = 15
-			theme.token.padding = 18
+			theme.token.controlHeight = 34
+			theme.token.fontSize = 14
+			theme.token.padding = 16
 		}
 
 		return theme
-	}, [config.themeMode, config.primaryColor, config.density])
+	}, [themeMode, primaryColor, density, config.density, config.themeMode, config.primaryColor, isDark])
 
 	const antdLocale = useMemo(() => {
 		if (config.locale === "zh_CN") return zhCN
@@ -141,11 +126,11 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 	return (
 		<StyleProvider hashPriority="high">
 			<ConfigProvider locale={antdLocale} theme={antdThemeConfig} componentSize={componentSize}>
-				<AntApp>
-					<ProConfigProvider dark={isDark} token={antdThemeConfig.token}>
+				<ProConfigProvider dark={isDark} token={{ ...antdThemeConfig.token }} key={isDark ? "dark" : "light"}>
+					<AntApp>
 						<NewbieContext.Provider value={contextValue}>{children}</NewbieContext.Provider>
-					</ProConfigProvider>
-				</AntApp>
+					</AntApp>
+				</ProConfigProvider>
 			</ConfigProvider>
 		</StyleProvider>
 	)

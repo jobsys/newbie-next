@@ -37,7 +37,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		const sFields: any[] = []
 
 		columns.forEach((col) => {
-			const { dataIndex, key, hideInSearch, sorter, fieldProps } = col
+			const { dataIndex, key, sorter, fieldProps } = col
 			const fieldKey = (fieldProps?.name as string) || (dataIndex as string) || (key as string)
 
 			if (!fieldKey || fieldKey === "action" || fieldKey === "option") return
@@ -48,7 +48,7 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 			}
 
 			// Handle Search
-			if (hideInSearch !== true) {
+			if (col.search !== false) {
 				qFields.push(col)
 			}
 		})

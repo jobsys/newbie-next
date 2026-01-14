@@ -118,7 +118,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 	useEffect(() => {
 		if (isOpen) {
 			const timer = setTimeout(() => {
-				if (valueType === "select") {
+				if (valueType === "select" || valueType === "switch") {
 					setSelectOpen(true)
 					if (selectRef.current) selectRef.current.focus()
 				} else if (valueType === "cascader") {
@@ -529,17 +529,17 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 				onClick: ({ key }) => fieldState.setCondition(key as SearchCondition),
 			}))
 			return (
-				<div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+				<div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()} style={{ display: "flex" }}>
 					<Dropdown menu={{ items: menuItems }} trigger={["click"]}>
 						<Tooltip title={conditionPart} placement="top">
 							<Button
 								type="text"
 								style={{
-									borderRadius: "6px 0 0 6px",
+									borderRadius: `${token.borderRadius}px 0 0 ${token.borderRadius}px`,
 									backgroundColor: token.colorFillQuaternary,
 									border: `1px solid ${token.colorBorder}`,
 									borderRight: "none",
-									height: "32px",
+									height: "100%",
 									padding: "0 12px",
 								}}
 							>
@@ -562,7 +562,7 @@ export function SearchItem(props: SearchItemProps): JSX.Element {
 					style={{
 						cursor: "pointer",
 						borderLeft: conditionAddon ? "none" : undefined,
-						borderRadius: conditionAddon ? "0 6px 6px 0" : "6px",
+						borderRadius: conditionAddon ? `0 ${token.borderRadius}px ${token.borderRadius}px 0` : `${token.borderRadius}px`,
 					}}
 				/>
 			</Space.Compact>

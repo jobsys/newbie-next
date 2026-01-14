@@ -4,7 +4,8 @@
 
 import { describe, it, expect } from "vitest"
 import { render, screen } from "@testing-library/react"
-import { NewbieProvider, useNewbieContext } from "../newbie-provider"
+import { NewbieProvider } from "../newbie-provider"
+import { useNewbieContext } from "../context"
 
 describe("NewbieProvider", () => {
 	it("should provide default context value", () => {

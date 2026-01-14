@@ -172,16 +172,16 @@ function SortPopoverContent(): JSX.Element {
 }
 
 export function NewbieSearch(props: NewbieSearchProps): JSX.Element {
-	const { columns, onSubmit, disableConditions, autoQuery } = props
+	const { columns, onSubmit, disableConditions, autoQuery, ghost } = props
 
 	return (
 		<SearchProvider columns={columns} onSubmit={onSubmit} disableConditions={disableConditions} autoQuery={autoQuery}>
-			<SearchFields />
+			<SearchFields ghost={ghost} />
 		</SearchProvider>
 	)
 }
 
-function SearchFields(): JSX.Element {
+function SearchFields({ ghost }: { ghost?: boolean }): JSX.Element {
 	const { token } = theme.useToken()
 	const {
 		queryFields,
@@ -352,11 +352,11 @@ function SearchFields(): JSX.Element {
 		<div
 			ref={containerRef}
 			style={{
-				background: token.colorBgContainer,
-				padding: "16px",
-				borderRadius: "8px",
-				boxShadow: token.boxShadowTertiary,
-				border: `1px solid ${token.colorBorderSecondary}`,
+				background: ghost ? "transparent" : token.colorBgContainer,
+				padding: ghost ? 0 : "24px",
+				borderRadius: ghost ? 0 : "8px",
+				boxShadow: ghost ? "none" : token.boxShadowTertiary,
+				border: ghost ? "none" : `1px solid ${token.colorBorderSecondary}`,
 			}}
 		>
 			{/* Expandable (Tiled) fields - Full width rows */}
@@ -413,7 +413,7 @@ function SearchFields(): JSX.Element {
 								<Button icon={<NewbieIcon icon={ArrowUpDown} />}>
 									排序
 									{sortForm.length > 0 && (
-										<Tag color="blue" bordered={false} style={{ marginLeft: 6, marginRight: 0 }}>
+										<Tag color="blue" variant="filled" style={{ marginLeft: 6, marginRight: 0 }}>
 											{sortForm.length}
 										</Tag>
 									)}
