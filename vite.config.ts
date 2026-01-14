@@ -66,6 +66,11 @@ export default defineConfig(({ command }) => {
 			environment: "jsdom",
 			setupFiles: "./src/test/setup.ts",
 			css: true,
+			server: {
+				deps: {
+					inline: ["@ant-design/pro-components"],
+				},
+			},
 			coverage: {
 				provider: "v8",
 				reporter: ["text", "json", "html"],

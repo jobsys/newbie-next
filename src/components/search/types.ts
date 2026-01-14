@@ -5,15 +5,17 @@
 /**
  * Search condition type
  */
-import type { ProColumns } from "@ant-design/pro-components"
+import type { ProColumnType } from "@ant-design/pro-components"
 
 /**
  * Enhanced ProColumns for NewbieSearch
  */
-export type NewbieProColumn<T = any, ValueType = "input"> = ProColumns<T, ValueType> & {
+export type NewbieProColumn<T = any, ValueType = "input"> = ProColumnType<T, ValueType> & {
 	/**
 	 * Field-level configuration for NewbieSearch
 	 */
+	hideInSearch?: boolean
+	renderFormItem?: any
 	fieldProps?: any & {
 		/** Available conditions for this field */
 		conditions?: SearchCondition[]

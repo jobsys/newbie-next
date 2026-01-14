@@ -91,7 +91,7 @@ export const NewbieUpload: React.FC<NewbieUploadProps> = (props) => {
 	const [fileList, setFileList] = useState<UploadFile[]>([])
 	const [previewOpen, setPreviewOpen] = useState(false)
 	const [previewImage, setPreviewImage] = useState("")
-	const [previewTitle, setPreviewTitle] = useState("")
+	// const [previewTitle, setPreviewTitle] = useState("")
 
 	const isImage = (file: UploadFile) => {
 		if (file.type?.startsWith("image/")) return true
@@ -114,7 +114,7 @@ export const NewbieUpload: React.FC<NewbieUploadProps> = (props) => {
 
 		setPreviewImage(file.url || (file.preview as string))
 		setPreviewOpen(true)
-		setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf("/") + 1))
+		// setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf("/") + 1))
 	}
 
 	// Sync value to fileList
@@ -305,7 +305,7 @@ export const NewbieUpload: React.FC<NewbieUploadProps> = (props) => {
 						visible: previewOpen,
 						onVisibleChange: (visible) => setPreviewOpen(visible),
 						afterOpenChange: (visible) => !visible && setPreviewImage(""),
-						title: previewTitle,
+						// title: previewTitle, // title is not supported in antd v6 preview config
 					}}
 					src={previewImage}
 				/>

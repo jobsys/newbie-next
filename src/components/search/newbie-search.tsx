@@ -17,7 +17,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button, Space, Tag, Popover, Select, Divider, Typography, theme } from "antd"
-import { Search, RotateCw, ChevronDown, ChevronUp, XCircle, ArrowUpDown, SortAsc, SortDesc, Trash2, Plus, GripVertical } from "lucide-react"
+import { Search, ChevronDown, ChevronUp, XCircle, ArrowUpDown, SortAsc, SortDesc, Trash2, Plus, GripVertical } from "lucide-react"
 import { SearchProvider } from "./context/search-provider"
 import { useSearchContext } from "./context/search-context"
 import { SearchItem } from "./components/search-item"
@@ -311,6 +311,9 @@ function SearchFields(): JSX.Element {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [initialVisibleCount, setInitialVisibleCount] = useState(4)
 
+	// Track container width to determine if action buttons need more space
+	const [containerWidth, setContainerWidth] = useState(0)
+
 	useEffect(() => {
 		if (!containerRef.current) return
 
@@ -318,6 +321,11 @@ function SearchFields(): JSX.Element {
 			for (const entry of entries) {
 				const width = entry.contentRect.width
 				if (width === 0) return
+				setContainerWidth(width)
+				// Grid layout: minmax(220px, 1fr), gap 16px
+				// cols * 220 + (cols - 1) * 16 <= width
+				// cols * 236 - 16 <= width
+				// cols * 236 <= width + 16
 				const count = Math.floor((width + 16) / (220 + 16))
 				setInitialVisibleCount(Math.max(1, count))
 			}
@@ -327,9 +335,18 @@ function SearchFields(): JSX.Element {
 		return () => observer.disconnect()
 	}, [])
 
+	// Calculate action buttons span
+	// Action buttons need approx ~320px.
+	// If column width is small (< 320px) and we have enough columns, span 2.
+	const colWidth = initialVisibleCount > 0 ? (containerWidth - (initialVisibleCount - 1) * 16) / initialVisibleCount : 0
+
+	const actionSpan = colWidth > 0 && colWidth < 320 && initialVisibleCount >= 2 ? 2 : 1
+
 	// Calculate visible standard fields
-	const visibleStandardFields = expanded ? standardFields : standardFields.slice(0, initialVisibleCount)
-	const hasMoreStandard = standardFields.length > initialVisibleCount
+	// Reserve spots for action buttons
+	const collapsedShowCount = Math.max(0, initialVisibleCount - actionSpan)
+	const visibleStandardFields = expanded ? standardFields : standardFields.slice(0, collapsedShowCount)
+	const showExpand = standardFields.length > collapsedShowCount
 
 	return (
 		<div
@@ -352,51 +369,35 @@ function SearchFields(): JSX.Element {
 			)}
 
 			{/* Standard fields - Grid layout */}
-			{standardFields.length > 0 && (
-				<div
-					style={{
-						display: "grid",
-						gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-						gap: "16px",
-						alignItems: "end",
-					}}
-				>
-					{visibleStandardFields.map((field) => (
-						<SearchItem key={(field.dataIndex as string) || (field.key as string)} field={field} />
-					))}
-				</div>
-			)}
-
-			{/* Action area */}
 			<div
 				style={{
-					marginTop: "16px",
-					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-					borderTop: `1px solid ${token.colorBorderSecondary}`,
-					paddingTop: "12px",
+					display: "grid",
+					gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+					gap: "16px",
+					alignItems: "end",
 				}}
 			>
-				<div>
-					{hasMoreStandard && (
-						<Button
-							type="link"
-							size="small"
-							onClick={() => setExpanded(!expanded)}
-							icon={expanded ? <NewbieIcon icon={ChevronUp} /> : <NewbieIcon icon={ChevronDown} />}
-							style={{ paddingLeft: 0 }}
-						>
-							{expanded ? "收起更多" : `更多筛选 (${standardFields.length - initialVisibleCount})`}
-						</Button>
-					)}
-				</div>
+				{visibleStandardFields.map((field) => (
+					<SearchItem key={(field.dataIndex as string) || (field.key as string)} field={field} />
+				))}
 
-				<Space size={16}>
-					<Button icon={<NewbieIcon icon={RotateCw} />} onClick={resetAll} disabled={activeConditions.length === 0 && !hasSubmitted}>
-						重置
-					</Button>
-					<Space>
+				{/* Action Area integrated into grid */}
+				<div
+					style={{
+						display: "flex",
+						alignItems: "center",
+						gap: 8,
+						marginBottom: "8px",
+						whiteSpace: "nowrap",
+						gridColumn: `span ${actionSpan} / -1`,
+						justifyContent: "flex-end",
+					}}
+				>
+					<Space size={8}>
+						<Button onClick={resetAll} disabled={activeConditions.length === 0 && !hasSubmitted}>
+							重置
+						</Button>
+
 						{sortFields.length > 0 && (
 							<Popover
 								content={<SortPopoverContent />}
@@ -419,11 +420,37 @@ function SearchFields(): JSX.Element {
 								</Button>
 							</Popover>
 						)}
+
 						<Button type="primary" icon={<NewbieIcon icon={Search} />} onClick={submit}>
 							搜索
 						</Button>
+
+						{showExpand && (
+							<a
+								onClick={() => setExpanded(!expanded)}
+								style={{
+									fontSize: 14,
+									display: "flex",
+									alignItems: "center",
+									gap: 4,
+									marginLeft: 8,
+									cursor: "pointer",
+									color: token.colorPrimary,
+								}}
+							>
+								{expanded ? (
+									<>
+										收起 <NewbieIcon icon={ChevronUp} size={14} />
+									</>
+								) : (
+									<>
+										展开 <NewbieIcon icon={ChevronDown} size={14} />
+									</>
+								)}
+							</a>
+						)}
 					</Space>
-				</Space>
+				</div>
 			</div>
 
 			{/* Active conditions tags */}
