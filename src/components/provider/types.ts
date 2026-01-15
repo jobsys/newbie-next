@@ -85,10 +85,6 @@ export interface NewbieProviderConfig {
 export interface NewbieProviderProps {
 	/** Provider configuration */
 	config?: NewbieProviderConfig
-	/** Direct access to core UI settings (convenience) */
-	themeMode?: "light" | "dark" | "system"
-	primaryColor?: string
-	density?: "loose" | "normal" | "compact"
 	/** Children components */
 	children: ReactNode
 }

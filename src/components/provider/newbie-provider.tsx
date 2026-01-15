@@ -6,11 +6,7 @@
  */
 
 import { useMemo } from "react"
-import { ConfigProvider, theme as antdTheme, App as AntApp } from "antd"
-import { StyleProvider } from "@ant-design/cssinjs"
-import { ProConfigProvider } from "@ant-design/pro-components"
 
-import zhCN from "antd/locale/zh_CN"
 import type { NewbieProviderProps, NewbieProviderConfig, NewbieContextValue } from "./types"
 import { NewbieContext } from "./context"
 import { deepMerge } from "../../utils/merge"
@@ -29,16 +25,12 @@ const defaultConfig: NewbieProviderConfig = {
  * NewbieProvider Component
  */
 export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
-	const { config: userConfig = {}, themeMode, primaryColor, density, children } = props
+	const { config: userConfig = {}, children } = props
 
 	// Merge user config with props and default config
 	const config = useMemo<NewbieProviderConfig>(() => {
-		const merged = deepMerge(defaultConfig, userConfig)
-		if (themeMode) merged.themeMode = themeMode
-		if (primaryColor) merged.primaryColor = primaryColor
-		if (density) merged.density = density
-		return merged
-	}, [userConfig, themeMode, primaryColor, density])
+		return deepMerge(defaultConfig, userConfig)
+	}, [userConfig])
 
 	// Get default props for a component
 	const getDefaultProps = useMemo(
@@ -69,69 +61,5 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 		[config, getDefaultProps, mergeProps],
 	)
 
-	// Build Ant Design Theme
-	const isDark = (themeMode || config.themeMode) === "dark"
-
-	const antdThemeConfig = useMemo(() => {
-		const theme = {
-			algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-			token: {} as Record<string, any>,
-		}
-
-		const getColor = (color?: string) => {
-			if (!color) return undefined
-			if (color.startsWith("#")) return color
-			const colorMap: Record<string, string> = {
-				blue: "#1677ff",
-				green: "#52c41a",
-				orange: "#fa8c16",
-				red: "#ff4d4f",
-				rose: "#eb2f96",
-				violet: "#722ed1",
-				yellow: "#fadb14",
-			}
-			return colorMap[color] || color
-		}
-
-		if (primaryColor || config.primaryColor) {
-			theme.token.colorPrimary = getColor(primaryColor || config.primaryColor)
-		}
-
-		// Density translation
-		if (config.density === "compact") {
-			theme.token.controlHeight = 30
-			theme.token.fontSize = 13
-			theme.token.padding = 12
-		} else if (config.density === "loose") {
-			theme.token.controlHeight = 34
-			theme.token.fontSize = 14
-			theme.token.padding = 16
-		}
-
-		return theme
-	}, [themeMode, primaryColor, density, config.density, config.themeMode, config.primaryColor, isDark])
-
-	const antdLocale = useMemo(() => {
-		if (config.locale === "zh_CN") return zhCN
-		return zhCN
-	}, [config.locale])
-
-	// Calculate componentSize
-	const componentSize = useMemo(() => {
-		if (config.density === "compact") return "small"
-		if (config.density === "loose") return "large"
-		return "middle"
-	}, [config.density])
-
-	return (
-		<StyleProvider hashPriority="high">
-			<ConfigProvider locale={antdLocale} theme={antdThemeConfig} componentSize={componentSize}>
-				<ProConfigProvider dark={isDark} token={{ ...antdThemeConfig.token }} key={isDark ? "dark" : "light"}>
-					<AntApp>
-						<NewbieContext.Provider value={contextValue}>{children}</NewbieContext.Provider>
-					</AntApp>
-				</ProConfigProvider>
-			</ConfigProvider>
-		</StyleProvider>
-	)
+	return <NewbieContext.Provider value={contextValue}>{children}</NewbieContext.Provider>
 }

@@ -14,7 +14,10 @@ import { IconDemo } from "./demos/icon-demo"
 import { CaptchaDemo } from "./demos/captcha-demo"
 import { ProviderDemo } from "./demos/provider-demo"
 import { HooksDemo } from "./demos/hooks-demo"
-import { Layout, Menu, Typography, theme, Space, Segmented, type MenuProps } from "antd"
+import { StyleProvider } from "@ant-design/cssinjs"
+import { ProConfigProvider } from "@ant-design/pro-components"
+import { ConfigProvider, App as AntApp, theme as antdTheme, Layout, Menu, Typography, theme, Space, Segmented, type MenuProps } from "antd"
+import zhCN from "antd/locale/zh_CN"
 import { Search, Table, Smile, ShieldCheck, CloudUpload, Settings as SettingsIcon, Webhook } from "lucide-react"
 
 const { Header, Sider, Content } = Layout
@@ -182,20 +185,51 @@ export function App() {
 	const [themeMode, setThemeMode] = useState<"light" | "dark">("light")
 	const [density, setDensity] = useState<"loose" | "normal" | "compact">("normal")
 
+	const isDark = themeMode === "dark"
+
+	// Construct Ant Design Theme Config
+	const antdThemeConfig = React.useMemo(() => {
+		const themeConfig = {
+			algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+			token: {} as Record<string, any>,
+		}
+
+		// Density translation
+		if (density === "compact") {
+			themeConfig.token.controlHeight = 30
+			themeConfig.token.fontSize = 13
+			themeConfig.token.padding = 12
+		} else if (density === "loose") {
+			themeConfig.token.controlHeight = 34
+			themeConfig.token.fontSize = 14
+			themeConfig.token.padding = 16
+		}
+
+		return themeConfig
+	}, [isDark, density])
+
+	const componentSize = density === "compact" ? "small" : density === "loose" ? "large" : "middle"
+
 	return (
-		<NewbieProvider
-			themeMode={themeMode}
-			density={density}
-			config={{
-				locale: "zh_CN",
-				defaults: {
-					NewbieForm: {
-						layout: "vertical",
-					},
-				},
-			}}
-		>
-			<PlaygroundLayout themeMode={themeMode} setThemeMode={setThemeMode} density={density} setDensity={setDensity} />
-		</NewbieProvider>
+		<StyleProvider hashPriority="high">
+			<ConfigProvider locale={zhCN} theme={antdThemeConfig} componentSize={componentSize}>
+				<ProConfigProvider dark={isDark} token={{ ...antdThemeConfig.token }}>
+					<AntApp>
+						<NewbieProvider
+							config={{
+								locale: "zh_CN",
+								defaults: {
+									NewbieForm: {
+										layout: "vertical",
+									},
+								},
+							}}
+						>
+							<PlaygroundLayout themeMode={themeMode} setThemeMode={setThemeMode} density={density} setDensity={setDensity} />
+						</NewbieProvider>
+					</AntApp>
+				</ProConfigProvider>
+			</ConfigProvider>
+		</StyleProvider>
 	)
 }
