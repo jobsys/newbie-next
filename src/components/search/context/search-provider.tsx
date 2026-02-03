@@ -37,13 +37,13 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 		const sFields: any[] = []
 
 		columns.forEach((col) => {
-			const { dataIndex, key, sorter, fieldProps } = col
+			const { dataIndex, key, sortable, fieldProps } = col
 			const fieldKey = (fieldProps?.name as string) || (dataIndex as string) || (key as string)
 
 			if (!fieldKey || fieldKey === "action" || fieldKey === "option") return
 
 			// Handle Sort
-			if (sorter) {
+			if (sortable) {
 				sFields.push(col)
 			}
 
@@ -80,15 +80,22 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 	const [hasSubmitted, setHasSubmitted] = useState(false)
 	const [submittedQueryForm, setSubmittedQueryForm] = useState<QueryForm>({})
 
-	// 3. Initialize sort form from columns (search for defaultSortOrder)
+	// 3. Initialize sort form from columns (parse sortable property)
 	const initialSortForm = useMemo<SortForm>(() => {
 		const sorts: SortForm = []
 		sortFields.forEach((field) => {
-			if (field.defaultSortOrder) {
-				sorts.push({
-					key: (field.fieldProps?.name as string) || (field.dataIndex as string) || (field.key as string),
-					order: field.defaultSortOrder === "ascend" ? "asc" : "desc",
-				})
+			const { sortable, fieldProps, dataIndex, key } = field
+			const fieldKey = (fieldProps?.name as string) || (dataIndex as string) || (key as string)
+
+			if (!sortable || sortable === true) return
+
+			// Case 1: sortable = 'asc' | 'desc'
+			if (typeof sortable === "string" && (sortable === "asc" || sortable === "desc")) {
+				sorts.push({ key: fieldKey, order: sortable })
+			}
+			// Case 2: sortable = SortField
+			else if (typeof sortable === "object" && "key" in sortable && "order" in sortable) {
+				sorts.push({ key: sortable.key, order: sortable.order })
 			}
 		})
 		return sorts
@@ -238,8 +245,18 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 			setSortForm((prev) => {
 				if (prev.find((s) => s.key === key)) return prev
 				const field = sortFields.find((f) => ((f.fieldProps?.name as string) || (f.dataIndex as string) || (f.key as string)) === key)
-				const defaultOrder = order || (field?.defaultSortOrder === "descend" ? "desc" : "asc")
-				return [...prev, { key, order: defaultOrder }]
+
+				// Determine default order from sortable property
+				let defaultOrder: SortOrder = "asc"
+				if (field?.sortable) {
+					if (typeof field.sortable === "string") {
+						defaultOrder = field.sortable
+					} else if (typeof field.sortable === "object") {
+						defaultOrder = field.sortable.order
+					}
+				}
+
+				return [...prev, { key, order: order || defaultOrder }]
 			})
 		},
 		[sortFields],
@@ -264,8 +281,20 @@ export function SearchProvider(props: SearchProviderProps): JSX.Element {
 				if (existing) {
 					return prev.map((s) => (s.key === key ? { ...s, order: s.order === "asc" ? "desc" : "asc" } : s))
 				}
+
 				const field = sortFields.find((f) => ((f.fieldProps?.name as string) || (f.dataIndex as string) || (f.key as string)) === key)
-				return [...prev, { key, order: field?.defaultSortOrder === "descend" ? "desc" : "asc" }]
+
+				// Determine default order from sortable property
+				let defaultOrder: SortOrder = "asc"
+				if (field?.sortable) {
+					if (typeof field.sortable === "string") {
+						defaultOrder = field.sortable
+					} else if (typeof field.sortable === "object") {
+						defaultOrder = field.sortable.order
+					}
+				}
+
+				return [...prev, { key, order: defaultOrder }]
 			})
 		},
 		[sortFields],

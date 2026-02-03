@@ -28,6 +28,16 @@ export type NewbieProColumn<T = any, ValueType = "input"> = ProColumnType<T, Val
 		/** Custom field name for search parameter key */
 		name?: string
 	}
+
+	/**
+	 * Enable sorting for this field in NewbieSearch
+	 * Unlike ProTable's native `sorter` property, this won't render sorting UI in the table
+	 * - `true`: Sortable without default value
+	 * - `'asc' | 'desc'`: Sortable with default sort order
+	 * - `SortField`: Sortable with custom field key and order
+	 * @default false
+	 */
+	sortable?: boolean | SortOrder | SortField
 }
 
 /**
