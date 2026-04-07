@@ -1,143 +1,143 @@
-# Architecture
+# 架构设计
 
-**Analysis Date:** 2025-04-07
+**分析日期：** 2025-04-07
 
-## Pattern Overview
+## 模式概览
 
-**Overall:** Component Library with Provider Pattern + Context-based State Management
+**整体架构：** 组件库 + Provider 模式 + 基于 Context 的状态管理
 
-**Key Characteristics:**
-- React component library extending Ant Design Pro Components
-- Provider-based global configuration and theme management
-- Context-based state management for complex components (Search)
-- Composable component architecture with hooks
-- Barrel file pattern for clean exports
-- TypeScript-first with comprehensive type definitions
+**主要特点：**
+- 扩展 Ant Design Pro Components 的 React 组件库
+- 基于 Provider 的全局配置和主题管理
+- 复杂组件（搜索）使用 Context 进行状态管理
+- 可组合的组件架构与 Hooks
+- Barrel 文件模式实现简洁导出
+- TypeScript 优先，全面的类型定义
 
-## Layers
+## 分层架构
 
-**Component Layer:**
-- Purpose: UI components that extend Ant Design functionality
-- Location: `src/components/`
-- Contains: React components with JSX, styling via Ant Design tokens
-- Depends on: Utils, Hooks, Types
-- Used by: Consumer applications
+**组件层（Component Layer）：**
+- 目的：扩展 Ant Design 功能的 UI 组件
+- 位置：`src/components/`
+- 包含：React JSX 组件，通过 Ant Design tokens 进行样式设置
+- 依赖：工具层、Hooks 层、类型层
+- 使用者：消费应用程序
 
-**Context Layer:**
-- Purpose: State management via React Context API
-- Location: `src/components/*/context/`
-- Contains: Context providers and hooks for component state
-- Depends on: React Context API
-- Used by: Component Layer
+**Context 层：**
+- 目的：通过 React Context API 进行状态管理
+- 位置：`src/components/*/context/`
+- 包含：Context Provider 和用于组件状态的 Hooks
+- 依赖：React Context API
+- 使用者：组件层
 
-**Hook Layer:**
-- Purpose: Reusable React hooks for HTTP, validation, and component logic
-- Location: `src/hooks/`
-- Contains: Custom hooks (useHttp, useRegex)
-- Depends on: Utils (http client)
-- Used by: Component Layer, Consumer applications
+**Hooks 层：**
+- 目的：可复用的 React Hooks，用于 HTTP、验证和组件逻辑
+- 位置：`src/hooks/`
+- 包含：自定义 Hooks（useHttp、useRegex）
+- 依赖：工具层（HTTP 客户端）
+- 使用者：组件层、消费应用程序
 
-**Utils Layer:**
-- Purpose: Utility functions and HTTP client
-- Location: `src/utils/`
-- Contains: HTTP client, merge utilities, classNames
-- Depends on: Axios, external dependencies
-- Used by: Component Layer, Hook Layer
+**工具层：**
+- 目的：工具函数和 HTTP 客户端
+- 位置：`src/utils/`
+- 包含：HTTP 客户端、深度合并、classNames
+- 依赖：Axios、外部依赖
+- 使用者：组件层、Hooks 层
 
-**Types Layer:**
-- Purpose: Shared TypeScript type definitions
-- Location: `src/types/`
-- Contains: Base interfaces, common types
-- Depends on: None
-- Used by: All layers
+**类型层：**
+- 目的：共享 TypeScript 类型定义
+- 位置：`src/types/`
+- 包含：基础接口、通用类型
+- 依赖：无
+- 使用者：所有层
 
-## Data Flow
+## 数据流
 
-**Search Component Flow:**
+**搜索组件数据流：**
 
-1. Columns configuration passed to `NewbieSearch` (`src/components/search/newbie-search.tsx`)
-2. `SearchProvider` initializes query and sort state from columns (`src/components/search/context/search-provider.tsx`)
-3. User interactions trigger `updateFieldValue` via context
-4. `SearchItem` renders field-specific inputs with condition selectors (`src/components/search/components/search-item.tsx`)
-5. Submit action filters valid values and calls `onSubmit` callback
-6. Sort management via drag-and-drop with `@dnd-kit`
+1. Columns 配置传递给 `NewbieSearch`（`src/components/search/newbie-search.tsx`）
+2. `SearchProvider` 从 columns 初始化查询和排序状态（`src/components/search/context/search-provider.tsx`）
+3. 用户交互通过 context 触发 `updateFieldValue`
+4. `SearchItem` 渲染带条件选择器的特定字段输入（`src/components/search/components/search-item.tsx`）
+5. 提交操作过滤有效值并调用 `onSubmit` 回调
+6. 通过 `@dnd-kit` 进行拖拽排序管理
 
-**Provider Configuration Flow:**
+**Provider 配置数据流：**
 
-1. `NewbieProvider` accepts configuration at app root (`src/components/provider/newbie-provider.tsx`)
-2. Configuration merged with defaults using `deepMerge` (`src/utils/merge.ts`)
-3. `useNewbieContext` provides access to config and `mergeProps` function (`src/components/provider/context.ts`)
-4. Components merge their props with context defaults
+1. `NewbieProvider` 在应用根节点接受配置（`src/components/provider/newbie-provider.tsx`）
+2. 使用 `deepMerge` 将配置与默认值合并（`src/utils/merge.ts`）
+3. `useNewbieContext` 提供对 config 和 `mergeProps` 函数的访问（`src/components/provider/context.ts`）
+4. 组件将 props 与 context 默认值合并
 
-**HTTP Flow:**
+**HTTP 数据流：**
 
-1. `createHttpClient` creates configured Axios instance (`src/utils/http.ts`)
-2. Response interceptor extracts data and handles Laravel-style responses
-3. `useHttp` hook manages request state in components (`src/hooks/use-http.ts`)
-4. CSRF token auto-extracted from meta tags or cookies
+1. `createHttpClient` 创建配置的 Axios 实例（`src/utils/http.ts`）
+2. 响应拦截器提取数据并处理 Laravel 风格响应
+3. `useHttp` Hook 在组件中管理请求状态（`src/hooks/use-http.ts`）
+4. 从 meta 标签或 cookies 自动提取 CSRF token
 
-## Key Abstractions
+## 核心抽象
 
-**NewbieProColumn:**
-- Purpose: Extended ProTable column type for search functionality
-- Examples: `src/components/search/types.ts`
-- Pattern: Extension of `@ant-design/pro-components` ProColumnType with search-specific fields
+**NewbieProColumn：**
+- 目的：搜索功能的扩展 ProTable 列类型
+- 示例：`src/components/search/types.ts`
+- 模式：扩展 `@ant-design/pro-components` 的 ProColumnType，添加搜索特定字段
 
-**Component Provider Pattern:**
-- Purpose: Global configuration and default props management
-- Examples: `src/components/provider/newbie-provider.tsx`
-- Pattern: Context-based with deep merge for nested config
+**组件 Provider 模式：**
+- 目的：全局配置和默认 Props 管理
+- 示例：`src/components/provider/newbie-provider.tsx`
+- 模式：基于 Context，支持嵌套配置的深度合并
 
-**Search Context:**
-- Purpose: Centralized search state management
-- Examples: `src/components/search/context/search-provider.tsx`, `src/components/search/context/search-context.tsx`
-- Pattern: Compound component pattern with context
+**搜索 Context：**
+- 目的：集中式搜索状态管理
+- 示例：`src/components/search/context/search-provider.tsx`、`src/components/search/context/search-context.tsx`
+- 模式：Context 的复合组件模式
 
-**Icon Adapter:**
-- Purpose: Bridge Lucide icons to Ant Design icon system
-- Examples: `src/components/icon/newbie-icon.tsx`
-- Pattern: Wrapper component using `@ant-design/icons` Icon component
+**图标适配器：**
+- 目的：将 Lucide 图标桥接到 Ant Design 图标系统
+- 示例：`src/components/icon/newbie-icon.tsx`
+- 模式：使用 `@ant-design/icons` 的 Icon 组件的包装组件
 
-## Entry Points
+## 入口点
 
-**Library Entry:**
-- Location: `src/index.ts`
-- Triggers: Imported by consumer applications
-- Responsibilities: Exports all public components, types, hooks, and utilities
+**库入口：**
+- 位置：`src/index.ts`
+- 触发：被消费应用程序导入
+- 职责：导出所有公共组件、类型、Hooks 和工具
 
-**Component Entry Points:**
-- `src/components/search/index.ts` - Search component exports
-- `src/components/provider/index.ts` - Provider exports
-- `src/components/icon/index.ts` - Icon component exports
-- `src/components/captcha/index.ts` - Captcha component exports
+**组件入口：**
+- `src/components/search/index.ts` - 搜索组件导出
+- `src/components/provider/index.ts` - Provider 导出
+- `src/components/icon/index.ts` - 图标组件导出
+- `src/components/captcha/index.ts` - 验证码组件导出
 
-**Playground Entry:**
-- Location: `playground/src/App.tsx`
-- Triggers: Development server (vite dev)
-- Responsibilities: Component showcase and testing environment
+**Playground 入口：**
+- 位置：`playground/src/App.tsx`
+- 触发：开发服务器（vite dev）
+- 职责：组件展示和测试环境
 
-## Error Handling
+## 错误处理
 
-**Strategy:** Centralized in HTTP client with custom callbacks
+**策略：** 在 HTTP 客户端中集中处理，支持自定义回调
 
-**Patterns:**
-- HTTP errors handled in response interceptor (`src/utils/http.ts`)
-- Business logic errors detected via `{ status: "SUCCESS", result: ... }` pattern
-- Custom error handlers via `onError` and `onUnauthorized` options
-- Context hooks throw if used outside provider
+**模式：**
+- HTTP 错误在响应拦截器中处理（`src/utils/http.ts`）
+- 通过 `{ status: "SUCCESS", result: ... }` 模式检测业务逻辑错误
+- 通过 `onError` 和 `onUnauthorized` 选项自定义错误处理器
+- Context Hooks 在 Provider 外部使用时抛出错误
 
-## Cross-Cutting Concerns
+## 横切关注点
 
-**Logging:** Console.error for failed option loading in SearchProvider
+**日志：** SearchProvider 中选项加载失败的 Console.error 日志
 
-**Validation:** Regex validation rules via `useRegexRule` (`src/hooks/use-regex.ts`)
+**验证：** 通过 `useRegexRule` 进行正则验证规则（`src/hooks/use-regex.ts`）
 
-**Authentication:** CSRF token handling in HTTP client; 401/403 error handlers
+**认证：** HTTP 客户端中的 CSRF token 处理；401/403 错误处理器
 
-**Styling:** Ant Design token-based styling with density configuration (loose/normal/compact)
+**样式：** 基于 Ant Design token 的样式，支持密度配置（loose/normal/compact）
 
-**Theming:** Supports light/dark modes via ConfigProvider integration
+**主题：** 通过 ConfigProvider 集成支持 light/dark 模式
 
 ---
 
-*Architecture analysis: 2025-04-07*
+*架构分析：2025-04-07*

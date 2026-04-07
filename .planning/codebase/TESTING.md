@@ -1,39 +1,39 @@
-# Testing Patterns
+# 测试模式
 
-**Analysis Date:** 2026-04-07
+**分析日期：** 2026-04-07
 
-## Test Framework
+## 测试框架
 
-**Runner:**
+**运行器：**
 - Vitest v4.0.16
-- Config: `vite.config.ts` (test configuration embedded in Vite config)
-- Environment: jsdom
+- 配置：`vite.config.ts`（测试配置嵌入在 Vite 配置中）
+- 环境：jsdom
 
-**Assertion Library:**
-- `@testing-library/jest-dom` v6.9.1 for DOM assertions
-- Vitest built-in assertions for unit tests
+**断言库：**
+- `@testing-library/jest-dom` v6.9.1 用于 DOM 断言
+- Vitest 内置断言用于单元测试
 
-**Run Commands:**
+**运行命令：**
 ```bash
-pnpm test              # Run tests in watch mode
-pnpm test:ui           # Run tests with UI
-pnpm test:run          # Run tests once
-pnpm test:coverage     # Run with coverage report
+pnpm test              # 以 watch 模式运行测试
+pnpm test:ui           # 以 UI 运行测试
+pnpm test:run          # 运行一次测试
+pnpm test:coverage     # 运行测试并生成覆盖率报告
 ```
 
-## Test File Organization
+## 测试文件组织
 
-**Location:**
-- Co-located with source files in `__tests__` subdirectories
-- Pattern: `src/components/[component]/__tests__/[component].test.tsx`
-- Utilities tested in `src/utils/__tests__/[util].test.ts`
-- Setup files in `src/test/`
+**位置：**
+- 与源文件共存于 `__tests__` 子目录
+- 模式：`src/components/[component]/__tests__/[component].test.tsx`
+- 工具测试位于 `src/utils/__tests__/[util].test.ts`
+- 设置文件位于 `src/test/`
 
-**Naming:**
-- Files: `[name].test.ts` or `[name].test.tsx`
-- Descriptive names that indicate what's being tested
+**命名：**
+- 文件：`[name].test.ts` 或 `[name].test.tsx`
+- 描述性名称，表明测试内容
 
-**Structure:**
+**结构：**
 ```
 src/
 ├── components/
@@ -59,14 +59,14 @@ src/
     └── test-utils.tsx
 ```
 
-## Test Structure
+## 测试结构
 
-**Suite Organization:**
+**套件组织：**
 ```typescript
 import { describe, it, expect } from "vitest"
 
-describe("ComponentName", () => {
-  it("should do something specific", () => {
+describe("组件名称", () => {
+  it("应该执行某个特定操作", () => {
     // Arrange
     const input = ...
 
@@ -77,38 +77,38 @@ describe("ComponentName", () => {
     expect(result).toBe(expected)
   })
 
-  describe("nested behavior group", () => {
-    it("should handle edge case", () => {
-      // Test implementation
+  describe("嵌套行为组", () => {
+    it("应该处理边界情况", () => {
+      // 测试实现
     })
   })
 })
 ```
 
-**Patterns:**
-- Top-level `describe` uses component/function name
-- Nested `describe` for grouping related behaviors
-- Test names use "should" format describing expected behavior
-- Arrange-Act-Comment structure implied in test body
+**模式：**
+- 顶级 `describe` 使用组件/函数名称
+- 嵌套 `describe` 用于分组相关行为
+- 测试名称使用 "should" 格式描述预期行为
+- 测试体中隐含的 Arrange-Act-Comment 结构
 
-**Setup Pattern:**
+**设置模式：**
 ```typescript
 // src/test/setup.ts
 import "@testing-library/jest-dom"
 import { afterEach, vi } from "vitest"
 import { cleanup } from "@testing-library/react"
 
-// Global mocks
+// 全局模拟
 vi.mock("@ant-design/pro-components", async () => ({
   ProConfigProvider: ({ children }: any) => children,
 }))
 
-// Cleanup after each test
+// 每个测试后清理
 afterEach(() => {
   cleanup()
 })
 
-// Global mocks for browser APIs
+// 浏览器 API 的全局模拟
 global.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
@@ -130,71 +130,71 @@ Object.defineProperty(window, "matchMedia", {
 })
 ```
 
-## Mocking
+## 模拟
 
-**Framework:** Vitest built-in mocking (`vi` namespace)
+**框架：** Vitest 内置模拟（`vi` 命名空间）
 
-**Patterns:**
+**模式：**
 ```typescript
-// Mock external modules
+// 模拟外部模块
 vi.mock("@ant-design/pro-components", async () => ({
   ProConfigProvider: ({ children }: any) => children,
 }))
 
-// Mock functions
+// 模拟函数
 const onSubmit = vi.fn()
 renderWithProviders(<NewbieSearch columns={columns} onSubmit={onSubmit} />)
 expect(onSubmit).toBeDefined()
 
-// Suppress console errors for expected errors
+// 抑制预期错误的控制台错误
 const consoleError = console.error
 console.error = () => {}
 expect(() => {
   render(<TestComponent />)
-}).toThrow("useNewbieContext must be used within NewbieProvider")
+}).toThrow("useNewbieContext 必须在 NewbieProvider 内使用")
 console.error = consoleError
 ```
 
-**What to Mock:**
-- External UI libraries with complex setup (Ant Design Pro)
-- Browser APIs not in jsdom (ResizeObserver, matchMedia)
-- Network requests (via interceptors or mock services)
-- Callback functions passed as props
+**模拟内容：**
+- 复杂设置的外部 UI 库（Ant Design Pro）
+- jsdom 中不存在的浏览器 API（ResizeObserver、matchMedia）
+- 网络请求（通过拦截器或模拟服务）
+- 作为 props 传递的回调函数
 
-**What NOT to Mock:**
-- Internal utility functions under test
-- React hooks when testing hook behavior directly
-- Ant Design base components (ConfigProvider wrapped)
+**不模拟的内容：**
+- 测试中的内部工具函数
+- 直接测试 hook 行为时的 React hooks
+- Ant Design 基础组件（包装在 ConfigProvider 中）
 
-## Fixtures and Factories
+## 夹具和工厂
 
-**Test Data:**
+**测试数据：**
 ```typescript
-// Inline fixtures within tests
+// 测试中的内联夹具
 const columns: NewbieProColumn[] = [
   { key: "name", valueType: "input", title: "姓名" }
 ]
 
-// Component factories for complex setups
+// 复杂设置的组件工厂
 function TestComponent() {
   const { config } = useNewbieContext()
   return <div>{config.locale}</div>
 }
 ```
 
-**Location:**
-- Test data defined inline in test files
-- No dedicated fixtures directory detected
-- Reusable wrapper components in `src/test/test-utils.tsx`
+**位置：**
+- 测试文件中定义的内联测试数据
+- 未检测到专用夹具目录
+- 可复用的包装组件位于 `src/test/test-utils.tsx`
 
-## Custom Test Utilities
+## 自定义测试工具
 
-**Location:** `src/test/test-utils.tsx`
+**位置：** `src/test/test-utils.tsx`
 
-**Pattern:**
+**模式：**
 ```typescript
 /**
- * Custom render function with Ant Design ConfigProvider
+ * 带 Ant Design ConfigProvider 的自定义渲染函数
  */
 export function renderWithProviders(
   ui: ReactElement,
@@ -206,11 +206,11 @@ export function renderWithProviders(
   return render(ui, { wrapper: Wrapper, ...options })
 }
 
-// Re-export everything from @testing-library/react
+// 从 @testing-library/react 重新导出所有内容
 export * from "@testing-library/react"
 ```
 
-**Usage:**
+**用法：**
 ```typescript
 import { renderWithProviders, screen } from "../../../test/test-utils"
 
@@ -218,11 +218,11 @@ renderWithProviders(<NewbieSearch columns={columns} />)
 expect(screen.getByText("搜索")).toBeInTheDocument()
 ```
 
-## Coverage
+## 覆盖率
 
-**Requirements:** Target not explicitly enforced
+**要求：** 未显式强制执行目标
 
-**Configuration:**
+**配置：**
 ```typescript
 // vite.config.ts
 coverage: {
@@ -238,56 +238,56 @@ coverage: {
 }
 ```
 
-**View Coverage:**
+**查看覆盖率：**
 ```bash
 pnpm test:coverage
 ```
 
-## Test Types
+## 测试类型
 
-**Unit Tests:**
-- Focus on isolated functions and hooks
-- No external dependencies (mocked)
-- Example: `src/utils/__tests__/merge.test.ts` for `deepMerge`
+**单元测试：**
+- 专注于隔离的函数和 hooks
+- 无外部依赖（已模拟）
+- 示例：`src/utils/__tests__/merge.test.ts` 测试 `deepMerge`
 
-**Component Tests:**
-- Use React Testing Library
-- Test user-visible behavior, not implementation
-- Wrap components in provider context when needed
+**组件测试：**
+- 使用 React Testing Library
+- 测试用户可见行为，而非实现
+- 需要时包装在 provider context 中
 
-**Hook Tests:**
-- Test hooks in isolation with minimal wrapper
-- Example: `src/hooks/__tests__/use-regex.test.ts`
+**Hook 测试：**
+- 以最小包装隔离测试 hooks
+- 示例：`src/hooks/__tests__/use-regex.test.ts`
 
-**E2E Tests:**
-- Not currently implemented
-- Playground app used for manual testing
+**E2E 测试：**
+- 当前未实现
+- Playground 应用用于手动测试
 
-## Common Patterns
+## 常见模式
 
-**Async Testing:**
+**异步测试：**
 ```typescript
-// Callbacks tested via vi.fn()
+// 通过 vi.fn() 测试回调
 const onSubmit = vi.fn()
 renderWithProviders(<Component onSubmit={onSubmit} />)
-// Trigger action
+// 触发操作
 expect(onSubmit).toHaveBeenCalled()
 ```
 
-**Error Testing:**
+**错误测试：**
 ```typescript
-// Suppress console noise for expected errors
+// 抑制预期错误的控制台噪音
 const consoleError = console.error
 console.error = () => {}
 expect(() => {
   render(<TestComponent />)
-}).toThrow("useNewbieContext must be used within NewbieProvider")
+}).toThrow("useNewbieContext 必须在 NewbieProvider 内使用")
 console.error = consoleError
 ```
 
-**Context Testing:**
+**Context 测试：**
 ```typescript
-// Wrap component in provider
+// 在 provider 中包装组件
 render(
   <NewbieProvider config={{ locale: "en_US" }}>
     <TestComponent />
@@ -296,13 +296,13 @@ render(
 expect(screen.getByText("en_US")).toBeInTheDocument()
 ```
 
-**DOM Assertions:**
+**DOM 断言：**
 ```typescript
-// Using jest-dom matchers
+// 使用 jest-dom 匹配器
 expect(screen.getByText("搜索")).toBeInTheDocument()
 expect(element).toHaveAttribute("disabled")
 ```
 
 ---
 
-*Testing analysis: 2026-04-07*
+*测试分析：2026-04-07*

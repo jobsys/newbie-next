@@ -1,107 +1,107 @@
-# Coding Conventions
+# 编码规范
 
-**Analysis Date:** 2026-04-07
+**分析日期：** 2026-04-07
 
-## Naming Patterns
+## 命名模式
 
-**Files:**
-- PascalCase for component files: `newbie-search.tsx`, `newbie-provider.tsx`
-- camelCase for utility/hook files: `use-regex.ts`, `use-http.ts`, `merge.ts`
-- Test files use `__tests__` subdirectory with `.test.ts` suffix: `src/utils/__tests__/merge.test.ts`
-- Barrel files named `index.ts` for clean exports
+**文件：**
+- 组件文件使用 PascalCase：`newbie-search.tsx`、`newbie-provider.tsx`
+- 工具/hook 文件使用 camelCase：`use-regex.ts`、`use-http.ts`、`merge.ts`
+- 测试文件使用 `__tests__` 子目录和 `.test.ts` 后缀：`src/utils/__tests__/merge.test.ts`
+- Barrel 文件命名为 `index.ts` 以实现简洁导出
 
-**Functions:**
-- camelCase for regular functions: `deepMerge`, `createHttpClient`, `useRegexRule`
-- PascalCase for React components: `NewbieProvider`, `NewbieSearch`, `NewbieIcon`
-- Hook functions prefixed with `use`: `useRegexRule`, `useHttp`, `useNewbieContext`
+**函数：**
+- 常规函数使用 camelCase：`deepMerge`、`createHttpClient`、`useRegexRule`
+- React 组件使用 PascalCase：`NewbieProvider`、`NewbieSearch`、`NewbieIcon`
+- Hook 函数以 `use` 为前缀：`useRegexRule`、`useHttp`、`useNewbieContext`
 
-**Variables:**
-- camelCase for local variables: `queryForm`, `sortFields`, `fieldOptions`
-- UPPER_CASE for constants: `PATTERNS` (regex patterns object)
-- Private/internal variables use underscore prefix in object properties
+**变量：**
+- 局部变量使用 camelCase：`queryForm`、`sortFields`、`fieldOptions`
+- 常量使用 UPPER_CASE：`PATTERNS`（正则模式对象）
+- 私有/内部变量在对象属性中使用下划线前缀
 
-**Types:**
-- PascalCase for interfaces and types: `NewbieProviderProps`, `HttpInstance`, `RegexRuleOptions`
-- Type parameters use single uppercase letters: `T`, `ValueType`
-- Union types defined with explicit literals: `type SearchCondition = "equal" | "notEqual" | ...`
+**类型：**
+- 接口和类型使用 PascalCase：`NewbieProviderProps`、`HttpInstance`、`RegexRuleOptions`
+- 类型参数使用单个大写字母：`T`、`ValueType`
+- 联合类型使用显式字面量定义：`type SearchCondition = "equal" | "notEqual" | ...`
 
-**CSS/Styles:**
-- camelCase for inline style properties (React standard)
-- Style objects typed as `React.CSSProperties` implicitly
+**CSS/样式：**
+- 内联样式属性使用 camelCase（React 标准）
+- 样式对象隐式类型为 `React.CSSProperties`
 
-## Code Style
+## 代码风格
 
-**Formatting:**
-- Tool: `oxfmt` (Oxlint's formatter)
-- Line endings: Unix-style (LF)
-- Quotes: Double quotes for strings, single quotes for JSX attributes when needed
-- Trailing commas: Used in multi-line object/array literals
-- Semicolons: Required, enforced by oxlint
+**格式化：**
+- 工具：`oxfmt`（Oxlint 的格式化工具）
+- 行尾：Unix 风格（LF）
+- 引号：字符串使用双引号，JSX 属性需要时使用单引号
+- 尾随逗号：多行对象/数组字面量中使用
+- 分号：必需，由 oxlint 强制执行
 
-**Linting:**
-- Tool: `oxlint` with custom configuration in `.oxlintrc.jsonc`
-- Plugins: oxc, eslint, react, unicorn
-- Key rules:
-  - `camelcase`: error
-  - `no-unused-vars`: error (TypeScript-aware)
-  - `no-plusplus`: error (except in for loops)
-  - React prop-types: off (TypeScript handles types)
-  - React hooks rules: `react-hooks/rules-of-hooks` as error, `react-hooks/exhaustive-deps` as warn
+**代码检查：**
+- 工具：`oxlint`，自定义配置在 `.oxlintrc.jsonc`
+- 插件：oxc、eslint、react、unicorn
+- 关键规则：
+  - `camelcase`：error
+  - `no-unused-vars`：error（支持 TypeScript）
+  - `no-plusplus`：error（for 循环除外）
+  - React prop-types：off（TypeScript 处理类型）
+  - React hooks 规则：`react-hooks/rules-of-hooks` 为 error，`react-hooks/exhaustive-deps` 为 warn
 
-## Import Organization
+## 导入组织
 
-**Order:**
-1. React imports first
-2. Third-party library imports (antd, lucide-react, @dnd-kit/*)
-3. Type imports (`import type { ... }`)
-4. Internal absolute imports (`@/components/*`, `@/utils/*`)
-5. Relative imports (siblings, parent directories)
+**顺序：**
+1. React 导入优先
+2. 第三方库导入（antd、lucide-react、@dnd-kit/*）
+3. 类型导入（`import type { ... }`）
+4. 内部绝对导入（`@/components/*`、`@/utils/*`）
+5. 相对导入（同级、父目录）
 
-**Path Aliases:**
-- `@/*` maps to `./src/*` (configured in `tsconfig.json` and `vite.config.ts`)
-- Example: `import { deepMerge } from "@/utils/merge"`
+**路径别名：**
+- `@/*` 映射到 `./src/*`（在 `tsconfig.json` 和 `vite.config.ts` 中配置）
+- 示例：`import { deepMerge } from "@/utils/merge"`
 
-**Import Style:**
-- Named imports preferred over default imports
-- Type imports use explicit `import type` syntax
-- Destructuring imports from React: `import { useMemo, useCallback } from "react"`
+**导入风格：**
+- 首选命名导入而非默认导入
+- 类型导入使用显式 `import type` 语法
+- 从 React 解构导入：`import { useMemo, useCallback } from "react"`
 
-## Error Handling
+## 错误处理
 
-**Patterns:**
-- HTTP errors handled in centralized interceptor (`src/utils/http.ts`)
-- Business logic errors throw `Error` with descriptive messages
-- Optional error callbacks in configuration objects: `onError?: (message: string, error: AxiosError) => void`
-- Promise rejection used for async errors
+**模式：**
+- HTTP 错误在集中式拦截器中处理（`src/utils/http.ts`）
+- 业务逻辑错误抛出带描述性消息的 `Error`
+- 配置对象中的可选错误回调：`onError?: (message: string, error: AxiosError) => void`
+- Promise rejection 用于异步错误
 
-**Type Safety:**
-- Strict TypeScript mode enabled
-- No implicit any
-- Null checks required before accessing optional properties
-- Type guards used for narrowing: `typeof value === "object"`, `Array.isArray(value)`
+**类型安全：**
+- 启用严格 TypeScript 模式
+- 无隐式 any
+- 访问可选属性前需要空检查
+- 使用类型守卫进行收窄：`typeof value === "object"`、`Array.isArray(value)`
 
-## Logging
+## 日志
 
-**Framework:** Native `console` with intentional usage
+**框架：** 原生 `console`，有目的的用法
 
-**Patterns:**
-- Errors logged to `console.error` with context: `console.error(\`Failed to load options for ${fieldKey}:\`, error)`
-- No production logging framework detected
-- Console suppression in tests for expected errors (see `newbie-provider.test.tsx`)
+**模式：**
+- 错误记录到 `console.error` 并带上下文：`console.error(\`加载 ${fieldKey} 的选项失败：\`, error)`
+- 未检测到生产日志框架
+- 测试中抑制预期的错误控制台输出（见 `newbie-provider.test.tsx`）
 
-## Comments
+## 注释
 
-**When to Comment:**
-- JSDoc for all exported functions, interfaces, and complex logic
-- Bilingual comments (Chinese and English) for business logic
-- Inline comments for non-obvious implementation details
+**何时注释：**
+- 所有导出的函数、接口和复杂逻辑使用 JSDoc
+- 业务逻辑使用双语注释（中文和英文）
+- 非明显的实现细节使用内联注释
 
-**JSDoc/TSDoc:**
-- All public APIs documented with `@param`, `@returns`, `@example`
-- Interface properties documented with inline comments
-- Function descriptions include purpose and usage examples
+**JSDoc/TSDoc：**
+- 所有公共 API 使用 `@param`、`@returns`、`@example` 记录
+- 接口属性使用内联注释记录
+- 函数描述包含用途和用法示例
 
-**Example:**
+**示例：**
 ```typescript
 /**
  * 深度合并工具函数 (Deep Merge Utility)
@@ -119,41 +119,41 @@
  */
 ```
 
-## Function Design
+## 函数设计
 
-**Size:**
-- Functions generally kept under 50 lines
-- Large components split into internal sub-components (e.g., `SortableItem`, `SortPopoverContent`)
+**大小：**
+- 函数通常保持在 50 行以内
+- 大组件拆分为内部子组件（如 `SortableItem`、`SortPopoverContent`）
 
-**Parameters:**
-- Use options objects for 3+ parameters
-- Optional parameters have default values or use `?:` syntax
-- Callback functions typed explicitly
+**参数：**
+- 3 个以上参数使用选项对象
+- 可选参数有默认值或使用 `?:` 语法
+- 回调函数显式类型
 
-**Return Values:**
-- Explicit return types on public functions
-- React components return `JSX.Element` explicitly
-- Hooks return tuples or objects with named properties
+**返回值：**
+- 公共函数有显式返回类型
+- React 组件显式返回 `JSX.Element`
+- Hooks 返回元组或带命名属性的对象
 
-## Module Design
+## 模块设计
 
-**Exports:**
-- Named exports preferred over default exports
-- Barrel files re-export from submodules: `src/components/provider/index.ts`
-- Type exports use `export type` syntax
+**导出：**
+- 首选命名导出而非默认导出
+- Barrel 文件从子模块重新导出：`src/components/provider/index.ts`
+- 类型导出使用 `export type` 语法
 
-**Barrel Files:**
-- Each component directory has `index.ts` for clean public API
-- Main `src/index.ts` exports all public APIs
-- Commented placeholders for future features (e.g., `// export { NewbieForm }`)
+**Barrel 文件：**
+- 每个组件目录有 `index.ts` 以实现简洁公共 API
+- 主 `src/index.ts` 导出所有公共 API
+- 未来功能的注释占位符（如 `// export { NewbieForm }`）
 
-**Structure Pattern:**
+**结构模式：**
 ```
 src/components/[component]/
-├── index.ts          # Barrel exports
-├── [component].tsx   # Main component
-├── types.ts          # Component-specific types
-├── context.ts        # React context (if needed)
+├── index.ts          # Barrel 导出
+├── [component].tsx   # 主组件
+├── types.ts          # 组件专用类型
+├── context.ts        # React context（如需要）
 ├── context/
 │   ├── [context]-provider.tsx
 │   └── [context]-context.tsx
@@ -165,4 +165,4 @@ src/components/[component]/
 
 ---
 
-*Convention analysis: 2026-04-07*
+*规范分析：2026-04-07*

@@ -1,127 +1,127 @@
-# External Integrations
+# 外部集成
 
-**Analysis Date:** 2026-04-07
+**分析日期：** 2026-04-07
 
-## APIs & External Services
+## API 和外部服务
 
-**HTTP/REST APIs:**
-- **Axios-based HTTP client** - Configurable HTTP client in `src/utils/http.ts`
-  - Supports custom base URLs
-  - Built-in interceptors for request/response handling
-  - Error handling with customizable callbacks
-  - CSRF token support (meta tag or cookie-based)
-  - Inertia.js response compatibility
+**HTTP/REST API：**
+- **基于 Axios 的 HTTP 客户端** - 可配置的 HTTP 客户端，位于 `src/utils/http.ts`
+  - 支持自定义基础 URL
+  - 内置请求/响应拦截器
+  - 支持自定义回调的错误处理
+  - CSRF token 支持（基于 meta 标签或 cookie）
+  - Inertia.js 响应兼容性
 
-**HTTP Client Configuration:**
+**HTTP 客户端配置：**
 ```typescript
-// Location: src/utils/http.ts, src/hooks/use-http.ts
+// 位置：src/utils/http.ts、src/hooks/use-http.ts
 interface HttpOptions {
-  baseUrl?: string           // API base path
-  disabledError?: boolean    // Disable global error notifications
-  onError?: (message, error) => void     // Error handler callback
-  onUnauthorized?: (error) => void       // 401 handler callback
+  baseUrl?: string           // API 基础路径
+  disabledError?: boolean    // 禁用全局错误通知
+  onError?: (message, error) => void     // 错误处理器回调
+  onUnauthorized?: (error) => void       // 401 处理器回调
 }
 ```
 
-## Data Storage
+## 数据存储
 
-**Databases:**
-- Not applicable - This is a UI component library, no direct database connections
+**数据库：**
+- 不适用 - 这是 UI 组件库，没有直接的数据库连接
 
-**File Storage:**
-- Local filesystem only - Build outputs to `dist/` directory
+**文件存储：**
+- 仅本地文件系统 - 构建输出到 `dist/` 目录
 
-**Caching:**
-- None detected - No Redis, localStorage, or other caching mechanisms
+**缓存：**
+- 未检测到 - 没有 Redis、localStorage 或其他缓存机制
 
-**State Management:**
-- React Context API for component-level state
-  - `SearchContext` in `src/components/search/context/`
-  - `NewbieContext` in `src/components/provider/context.ts`
+**状态管理：**
+- 用于组件级状态的 React Context API
+  - `src/components/search/context/` 中的 `SearchContext`
+  - `src/components/provider/context.ts` 中的 `NewbieContext`
 
-## Authentication & Identity
+## 认证与身份
 
-**Auth Provider:**
-- Custom implementation via HTTP client interceptors
-- Supports:
-  - CSRF token extraction from meta tags (`<meta name="csrf-token">`)
-  - Laravel-style XSRF-TOKEN cookie support
-  - 401 Unauthorized handling via `onUnauthorized` callback
-  - 403 Forbidden handling
+**认证提供者：**
+- 通过 HTTP 客户端拦截器的自定义实现
+- 支持：
+  - 从 meta 标签提取 CSRF token（`<meta name="csrf-token">`）
+  - Laravel 风格的 XSRF-TOKEN cookie 支持
+  - 通过 `onUnauthorized` 回调处理 401 未授权
+  - 403 禁止访问处理
 
-## Monitoring & Observability
+## 监控与可观测性
 
-**Error Tracking:**
-- None - Custom error handling via `onError` callbacks only
+**错误跟踪：**
+- 无 - 仅通过 `onError` 回调进行自定义错误处理
 
-**Logs:**
-- Console-based logging (development only)
-- No external logging service integration
+**日志：**
+- 基于 Console 的日志（仅开发环境）
+- 没有外部日志服务集成
 
-## CI/CD & Deployment
+## CI/CD 与部署
 
-**Hosting:**
-- NPM Registry (public)
-  - Config: `registry.npmjs.org`
-  - Published as `@jobsys/newbie-next`
+**托管：**
+- NPM Registry（公共）
+  - 配置：`registry.npmjs.org`
+  - 发布为 `@jobsys/newbie-next`
 
-**CI Pipeline:**
-- GitHub Actions (directory exists: `.github/`)
-- Changesets for automated versioning and publishing
+**CI 流水线：**
+- GitHub Actions（目录存在：`.github/`）
+- 使用 Changesets 进行自动化版本控制和发布
 
-**Release Process:**
+**发布流程：**
 ```bash
 pnpm build && changeset publish
 ```
 
-**Build Artifacts:**
-- Output directory: `dist/`
-- Files: `dist/index.js`, `dist/index.d.ts`, `dist/styles.css`
+**构建产物：**
+- 输出目录：`dist/`
+- 文件：`dist/index.js`、`dist/index.d.ts`、`dist/styles.css`
 
-## Environment Configuration
+## 环境配置
 
-**Required env vars:**
-- None required for the library itself
-- Environment-specific configuration passed via `NewbieProvider` or HTTP client setup
+**必需的环境变量：**
+- 库本身不需要
+- 环境特定的配置通过 `NewbieProvider` 或 HTTP 客户端设置传递
 
-**Configuration Pattern:**
+**配置模式：**
 ```typescript
-// Global configuration via NewbieProvider
+// 通过 NewbieProvider 进行全局配置
 <NewbieProvider config={{ theme, httpClient, componentDefaults }}>
   <App />
 </NewbieProvider>
 ```
 
-## Webhooks & Callbacks
+## Webhooks 与回调
 
-**Incoming:**
-- None - This is a client-side library
+**传入：**
+- 无 - 这是客户端库
 
-**Outgoing:**
-- None - No webhook calls made by the library
+**传出：**
+- 无 - 库不发起 webhook 调用
 
-## Third-Party Services Integration
+## 第三方服务集成
 
-**Icon Libraries:**
-- **Lucide React** - Modern icon set (`lucide-react`)
-- **Ant Design Icons** - Ant Design's icon library (`@ant-design/icons`)
+**图标库：**
+- **Lucide React** - 现代图标集（`lucide-react`）
+- **Ant Design Icons** - Ant Design 的图标库（`@ant-design/icons`）
 
-**Date/Time:**
-- **Day.js** - Date manipulation with plugins:
-  - `weekday` plugin
-  - `localeData` plugin
+**日期/时间：**
+- **Day.js** - 带插件的日期处理：
+  - `weekday` 插件
+  - `localeData` 插件
 
-**Drag & Drop:**
-- **@dnd-kit** - Modern drag and drop toolkit
+**拖拽：**
+- **@dnd-kit** - 现代拖拽工具包
 
-## Deployment Dependencies
+## 部署依赖
 
-**Build-time:**
+**构建时：**
 - Vite 8.0.5
 - TypeScript 6.0.2
-- Rollup (via Vite)
+- Rollup（通过 Vite）
 
-**Runtime (peer dependencies):**
+**运行时（peer dependencies）：**
 - React ^18.0.0 || ^19.0.0
 - React DOM ^18.0.0 || ^19.0.0
 - Ant Design ^5.0.0 || ^6.0.0
@@ -129,4 +129,4 @@ pnpm build && changeset publish
 
 ---
 
-*Integration audit: 2026-04-07*
+*集成审计：2026-04-07*
