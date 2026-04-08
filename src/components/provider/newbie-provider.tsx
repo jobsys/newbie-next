@@ -3,14 +3,17 @@
  *
  * Provides global configuration and default props override for all components.
  * Acts as a UI adapter to handle themes, colors, and density across different antd versions.
+ *
+ * 注意：此组件不再包裹 ConfigProvider，因为主应用应该在外层配置 ConfigProvider
+ * 这样可以确保主题动态切换时不会被重新挂载
  */
 
 import { useMemo } from "react"
-import { ConfigProvider, App as AntApp, theme as antdTheme } from "antd"
+import { App as AntApp } from "antd"
 
 import type { NewbieProviderProps, NewbieProviderConfig, NewbieContextValue } from "./types"
 import { NewbieContext } from "./context"
-import { deepMerge } from "../../utils/merge"
+import { deepMerge } from "@/utils/merge"
 
 /**
  * Default configuration
@@ -24,6 +27,9 @@ const defaultConfig: NewbieProviderConfig = {
 
 /**
  * NewbieProvider Component
+ *
+ * 支持动态主题切换，通过接收变化的 config 自动更新上下文
+ * 注意：需要在 ConfigProvider 内部使用
  */
 export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 	const { config: userConfig = {}, children } = props
@@ -52,7 +58,7 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 		[getDefaultProps],
 	)
 
-	// Context value
+	// Context value - 当 config 变化时自动更新
 	const contextValue = useMemo<NewbieContextValue>(
 		() => ({
 			config,
@@ -62,44 +68,9 @@ export function NewbieProvider(props: NewbieProviderProps): JSX.Element {
 		[config, getDefaultProps, mergeProps],
 	)
 
-	// Build AntD theme config based on Newbie config
-	const antdThemeConfig = useMemo(() => {
-		const isDark = config.themeMode === "dark"
-		const algorithm = isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm
-
-		const token: Record<string, any> = {}
-
-		// Apply primary color if provided
-		if (config.primaryColor) {
-			token.colorPrimary = config.primaryColor
-		}
-
-		// Apply density settings
-		if (config.density === "compact") {
-			token.controlHeight = 30
-			token.fontSize = 13
-			token.padding = 12
-		} else if (config.density === "loose") {
-			token.controlHeight = 34
-			token.fontSize = 14
-			token.padding = 16
-		}
-
-		return { algorithm, token }
-	}, [config.themeMode, config.primaryColor, config.density])
-
-	// Map density to AntD componentSize
-	const componentSize = useMemo(() => {
-		if (config.density === "compact") return "small"
-		if (config.density === "loose") return "large"
-		return "middle"
-	}, [config.density])
-
 	return (
 		<NewbieContext.Provider value={contextValue}>
-			<ConfigProvider theme={antdThemeConfig} componentSize={componentSize}>
-				<AntApp>{children}</AntApp>
-			</ConfigProvider>
+			<AntApp>{children}</AntApp>
 		</NewbieContext.Provider>
 	)
 }
