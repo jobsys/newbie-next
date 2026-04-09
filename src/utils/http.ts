@@ -104,11 +104,6 @@ export function createHttpClient(options: HttpOptions = {}, instance?: HttpInsta
 
 	http.interceptors.response.use(
 		(response: AxiosResponse) => {
-			// Handle Inertia responses
-			if (response.headers["x-inertia"]) {
-				return response as any
-			}
-
 			// 兼容处理：如果返回包含 status 和 result (Laravel standard success response)
 			const data = response.data
 			if (data && typeof data === "object" && "status" in data && "result" in data) {

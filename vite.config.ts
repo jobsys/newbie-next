@@ -19,8 +19,10 @@ export default defineConfig(({ command }) => {
 					insertTypesEntry: true,
 					include: ["src"],
 					exclude: ["src/test", "**/*.test.ts", "**/setup.ts", "**/playground/**"],
+					outDir: "dist",
+					rollupTypes: true,
 				}),
-		].filter(Boolean),
+		],
 		resolve: {
 			alias: {
 				"@": resolve(__dirname, "./src"),
@@ -53,10 +55,6 @@ export default defineConfig(({ command }) => {
 								"@dnd-kit/utilities",
 								"axios",
 							],
-							output: {
-								preserveModules: true,
-								preserveModulesRoot: "src",
-							},
 						},
 					},
 				}),

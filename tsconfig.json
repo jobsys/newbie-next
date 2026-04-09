@@ -14,7 +14,11 @@
 		"allowImportingTsExtensions": true,
 		"isolatedModules": true,
 		"moduleDetection": "force",
-		"noEmit": true,
+		"noEmit": false,
+		"rootDir": "./src",
+		"declaration": true,
+		"declarationDir": "./dist",
+		"emitDeclarationOnly": true,
 		"jsx": "react-jsx",
 		/* Linting */
 		"strict": true,
